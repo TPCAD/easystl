@@ -1,21 +1,9 @@
+#include "./help_struct.h"
 #include "utility.h"
-int foo() {
-    constexpr easystl::pair<int, double> p(42, 3.14);
-    if (p.first == 42) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-int bar() {
-    constexpr easystl::pair<int, double> p(42, 3.14);
-    if (p.second == 1.14) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-int main() {
-    foo();
-    bar();
+#include "gtest/gtest.h"
+
+TEST(PairTest, Constuctor) {
+    easystl::pair<int, float> p1(42, 3.14);
+    easystl::pair<int, float> p2(42, 3.14);
+    // p1 = p2;
 }
