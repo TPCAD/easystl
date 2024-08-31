@@ -44,6 +44,40 @@ ForwardIter uninitialized_copy(InputIter first, InputIter last,
 }
 
 /*
+ * uninitialized_copy
+ * 将 [first, first + n) 位置的内容拷贝到以 result
+ * 为起始位置的空间中，返回复制结束的位置
+ * */
+template <class InputIter, class Size, class ForwardIter>
+ForwardIter unchecked_uninit_copy_n(InputIter first, Size n, ForwardIter result,
+                                    std::true_type) {
+    return easystl::copy_n(first, n, result);
+}
+
+template <class InputIter, class Size, class ForwardIter>
+ForwardIter unchecked_uninit_copy_n(InputIter first, Size n, ForwardIter result,
+                                    std::false_type) {
+    auto cur = result;
+    try {
+        for (; n > 0; --n, ++cur, ++first) {
+            easystl::construct(&*cur, *first);
+        }
+    } catch (...) {
+        for (; result != cur; --cur)
+            easystl::destroy(&*cur);
+    }
+    return cur;
+}
+
+template <class InputIter, class Size, class ForwardIter>
+ForwardIter uninitialized_copy_n(InputIter first, Size n, ForwardIter result) {
+    return easystl::unchecked_uninit_copy_n(
+        first, n, result,
+        std::is_trivially_copy_assignable<
+            typename iterator_traits<InputIter>::value_type>{});
+}
+
+/*
  * uninitialized_fill_n
  * 从 first 位置开始填充，填充 n 个元素值，返回填充结束的位置
  * */
