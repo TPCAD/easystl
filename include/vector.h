@@ -263,7 +263,7 @@ template <class T> struct vector {
 
 // copy assignment
 template <class T> vector<T> &vector<T>::operator=(const vector &rhs) {
-    if (this != *rhs) {
+    if (this != &rhs) {
         const auto len = rhs.size();
         if (len > capacity()) {
             vector tmp(rhs.begin(), rhs.end());
