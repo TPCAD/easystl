@@ -41,11 +41,13 @@ TEST(VectorTest, Constructor) {
     EXPECT_EQ(vec5.begin(), nullptr);
 
     // Copy assignment
-    easystl::vector<int> vec8 = vec6;
+    easystl::vector<int> vec8;
+    vec8 = vec6;
     EXPECT_EQ(vec8, vec6);
 
-    // Move constructor
-    easystl::vector<int> vec9 = easystl::move(vec6);
+    // Move assignment
+    easystl::vector<int> vec9;
+    vec9 = easystl::move(vec6);
     EXPECT_EQ(vec9, vec8);
     EXPECT_EQ(vec6.begin(), nullptr);
 }
