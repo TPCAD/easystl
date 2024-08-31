@@ -149,6 +149,31 @@ BidirectionalIter2 copy_backward(BidirectionalIter1 first,
 }
 
 /*
+ * copy_n
+ * 将 [first, first + n) 区间的元素拷贝到 [result, result + n)
+ * */
+template <class InputIter, class Size, class OutputIter>
+OutputIter unchecked_copy_n(InputIter first, Size n, OutputIter result,
+                            easystl::input_iterator_tag) {
+    for (; n > 0; --n, ++first, ++result) {
+        *result = *first;
+    }
+    return result;
+}
+
+template <class RandomIter, class Size, class OutputIter>
+OutputIter unchecked_copy_n(RandomIter first, Size n, OutputIter result,
+                            easystl::random_access_iterator_tag) {
+    auto last = first + n;
+    return easystl::copy(first, last, result);
+}
+
+template <class InputIter, class Size, class OutputIter>
+OutputIter copy_n(InputIter first, Size n, OutputIter result) {
+    return unchecked_copy_n(first, n, result, iterator_category(first));
+}
+
+/*
  * move
  * 将 [first, last) 区间的元素移动到 [result, result + (last - first))
  * */
