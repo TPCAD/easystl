@@ -17,6 +17,11 @@ template <class T> class allocator {
     typedef ptrdiff_t difference_type;
 
   public:
+    allocator() noexcept {}
+    allocator(const allocator &) noexcept {}
+    template <typename T1> allocator(const allocator<T1> &) noexcept {}
+    ~allocator() noexcept {}
+
     static T *allocate();
     static T *allocate(size_type n);
 
@@ -77,6 +82,19 @@ template <class T> void allocator<T>::destroy(T *ptr) { easystl::destroy(ptr); }
 template <class T> void allocator<T>::destroy(T *first, T *last) {
     easystl::destroy(first, last);
 }
+
+// FIX: strange
+template <typename T1, typename T2>
+inline bool operator!=(const allocator<T1> &, const allocator<T2> &) noexcept {
+    return false;
+}
+
+// FIX: strange
+template <typename T1, typename T2>
+inline bool operator==(const allocator<T1> &, const allocator<T2> &) noexcept {
+    return true;
+}
+
 } // namespace easystl
 
 #endif // !EASYSTL_ALLOCATOR_H
