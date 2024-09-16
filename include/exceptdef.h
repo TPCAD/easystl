@@ -8,6 +8,10 @@ namespace easystl {
 
 #define EASYSTL_DEBUG(expr) assert(expr)
 
+#define THROW_LOGIC_ERROR_IF(expr, what)                                       \
+    if ((expr))                                                                \
+    throw std::logic_error(what)
+
 #define THROW_LENGTH_ERROR_IF(expr, what)                                      \
     if ((expr))                                                                \
     throw std::length_error(what)
