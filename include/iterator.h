@@ -2,7 +2,9 @@
 #define EASYSTL_ITERATOR_H
 
 #include "type_traits.h"
+#include <alloc_traits.h>
 #include <cstddef>
+#include <type_traits>
 
 namespace easystl {
 
@@ -309,6 +311,197 @@ template <class Iterator>
 bool operator>=(const reverse_iterator<Iterator> &lhs,
                 const reverse_iterator<Iterator> &rhs) {
     return !(lhs < rhs);
+}
+
+template <typename Iterator, typename Container> class normal_iterator {
+  protected:
+    Iterator M_current;
+
+    typedef easystl::iterator_traits<Iterator> traits_type;
+
+    template <typename Iter>
+    using convertible_from = typename std::enable_if<
+        std::is_convertible<Iter, Iterator>::value>::type;
+
+  public:
+    typedef Iterator iterator_type;
+    typedef typename traits_type::iterator_category iterator_category;
+    typedef typename traits_type::value_type value_type;
+    typedef typename traits_type::difference_type difference_type;
+    typedef typename traits_type::reference reference;
+    typedef typename traits_type::pointer pointer;
+
+    constexpr normal_iterator() noexcept : M_current(Iterator()) {}
+
+    explicit normal_iterator(const Iterator &i) noexcept : M_current(i) {}
+
+    // Allow iterator to const_iterator conversion
+    template <typename Iter, typename = convertible_from<Iter>>
+    normal_iterator(const normal_iterator<Iter, Container> &i) noexcept
+        : M_current(i.base()) {}
+
+    // Forward iterator requirements
+    reference operator*() const noexcept { return *M_current; }
+
+    pointer operator->() const noexcept { return M_current; }
+
+    normal_iterator &operator++() noexcept {
+        ++M_current;
+        return *this;
+    }
+
+    normal_iterator operator++(int) noexcept {
+        return normal_iterator(M_current++);
+    }
+
+    // Bidirectional iterator requirements
+    normal_iterator &operator--() noexcept {
+        --M_current;
+        return *this;
+    }
+
+    normal_iterator operator--(int) noexcept {
+        return normal_iterator(M_current--);
+    }
+
+    // Random access iterator requirements
+    reference operator[](difference_type n) const noexcept {
+        return M_current[n];
+    }
+
+    normal_iterator &operator+=(difference_type n) noexcept {
+        M_current += n;
+        return *this;
+    }
+
+    normal_iterator operator+(difference_type n) const noexcept {
+        return normal_iterator(M_current + n);
+    }
+
+    normal_iterator &operator-=(difference_type n) noexcept {
+        M_current -= n;
+        return *this;
+    }
+
+    normal_iterator operator-(difference_type n) const _GLIBCXX_NOEXCEPT {
+        return normal_iterator(M_current - n);
+    }
+
+    const Iterator &base() const noexcept { return M_current; }
+};
+
+// Forward iterator requirements
+template <typename IteratorL, typename IteratorR, typename Container>
+inline bool
+operator==(const normal_iterator<IteratorL, Container> &lhs,
+           const normal_iterator<IteratorR, Container> &rhs) noexcept {
+    return lhs.base() == rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator==(const normal_iterator<Iterator, Container> &lhs,
+           const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() == rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR, typename Container>
+inline bool
+operator!=(const normal_iterator<IteratorL, Container> &lhs,
+           const normal_iterator<IteratorR, Container> &rhs) noexcept {
+    return lhs.base() != rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator!=(const normal_iterator<Iterator, Container> &lhs,
+           const normal_iterator<Iterator, Container> &rhs) _GLIBCXX_NOEXCEPT {
+    return lhs.base() != rhs.base();
+}
+
+// Random access iterator requirements
+template <typename IteratorL, typename IteratorR, typename Container>
+_GLIBCXX_NODISCARD inline bool
+operator<(const normal_iterator<IteratorL, Container> &lhs,
+          const normal_iterator<IteratorR, Container> &rhs) _GLIBCXX_NOEXCEPT {
+    return lhs.base() < rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator<(const normal_iterator<Iterator, Container> &lhs,
+          const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() < rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR, typename Container>
+inline bool
+operator>(const normal_iterator<IteratorL, Container> &lhs,
+          const normal_iterator<IteratorR, Container> &rhs) noexcept {
+    return lhs.base() > rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator>(const normal_iterator<Iterator, Container> &lhs,
+          const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() > rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR, typename Container>
+inline bool
+operator<=(const normal_iterator<IteratorL, Container> &lhs,
+           const normal_iterator<IteratorR, Container> &rhs) noexcept {
+    return lhs.base() <= rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator<=(const normal_iterator<Iterator, Container> &lhs,
+           const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() <= rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR, typename Container>
+inline bool
+operator>=(const normal_iterator<IteratorL, Container> &lhs,
+           const normal_iterator<IteratorR, Container> &rhs) noexcept {
+    return lhs.base() >= rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline bool
+operator>=(const normal_iterator<Iterator, Container> &lhs,
+           const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() >= rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR, typename Container>
+inline auto operator-(const normal_iterator<IteratorL, Container> &lhs,
+                      const normal_iterator<IteratorR, Container> &rhs) noexcept
+    -> decltype(lhs.base() - rhs.base()) {
+    return lhs.base() - rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline typename normal_iterator<Iterator, Container>::difference_type
+operator-(const normal_iterator<Iterator, Container> &lhs,
+          const normal_iterator<Iterator, Container> &rhs) noexcept {
+    return lhs.base() - rhs.base();
+}
+
+template <typename Iterator, typename Container>
+inline normal_iterator<Iterator, Container>
+operator+(typename normal_iterator<Iterator, Container>::difference_type n,
+          const normal_iterator<Iterator, Container> &i) noexcept {
+    return normal_iterator<Iterator, Container>(i.base() + n);
+}
+
+template <typename Iterator, typename Container>
+constexpr auto
+to_address(const easystl::normal_iterator<Iterator, Container> &it) noexcept
+    -> decltype(easystl::to_address(it.base())) {
+    return easystl::to_address(it.base());
 }
 
 } // namespace easystl
