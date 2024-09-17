@@ -1143,17 +1143,39 @@ struct basic_string {
                              M_limit(pos, n1), n2, c);
     }
 
+    /**
+     *  @brief  以字符串替换范围内字符串
+     *  @param  iter1  指向范围起始位置的迭代器
+     *  @param  iter2  指向范围结束位置的迭代器
+     *  @param  str  插入的字符串
+     *  @return  此字符串的引用
+     */
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           const basic_string &str) {
         return this->replace(iter1, iter2, str.M_data(), str.size());
     }
 
+    /**
+     *  @brief  以部分 C 风格字符串替换范围内字符串
+     *  @param  iter1  指向范围起始位置的迭代器
+     *  @param  iter2  指向范围结束位置的迭代器
+     *  @param  s  C 风格字符串指针
+     *  @param  n  插入的字符的数量
+     *  @return  此字符串的引用
+     */
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           const CharType *s, size_type n) {
         EASYSTL_DEBUG(iter1 >= begin() && iter1 <= iter2 && iter2 <= end());
         return this->replace(iter1 - begin(), iter2 - iter1, s, n);
     }
 
+    /**
+     *  @brief  以 C 风格字符串替换范围内字符串
+     *  @param  iter1  指向范围起始位置的迭代器
+     *  @param  iter2  指向范围结束位置的迭代器
+     *  @param  s  C 风格字符串指针
+     *  @return  此字符串的引用
+     */
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           const CharType *s) {
         return this->replace(iter1, iter2, s, traits_type::length(s));
