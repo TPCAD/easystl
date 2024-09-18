@@ -8,6 +8,7 @@
 #include "exceptdef.h"
 #include "iterator.h"
 #include "memory.h"
+#include <cassert>
 #include <cstring>
 #include <functional>
 #include <initializer_list>
@@ -335,7 +336,13 @@ struct basic_string {
 
     void M_assign(const basic_string &);
 
-    // TODO: comment
+    /**
+     *  @brief  插入、替换、追加的功能的辅助函数，会重新分配内存。
+     *  @param  pos  被替换的第一个字符的索引
+     *  @param  len1  被替换的字符的数量
+     *  @param  s  插入的字符串的指针
+     *  @param  len2  插入的字符的数量
+     */
     void M_mutate(size_type pos, size_type len1, const CharType *s,
                   size_type len2);
 
@@ -900,6 +907,40 @@ struct basic_string {
         return operator[](this->size() - 1);
     }
 
+    /**
+     *  @brief  追加字符串
+     *  @param  str  待插入的字符串
+     *  @return  此字符串的引用
+     */
+    basic_string &append(const basic_string &str) {
+        return this->append(str.M_data(), str.size());
+    }
+
+    /**
+     *  @brief  追加部分字符串
+     *  @param  str  待插入的字符串
+     *  @param  pos  待插入的字符的起始索引
+     *  @param  n  待插入的字符的数量
+     *  @return  此字符串的引用
+     */
+    basic_string &append(const basic_string &str, size_type pos, size_type n) {
+        return this->append(str.M_data() +
+                                str.M_check(pos, "basic_string::append"),
+                            str.M_limit(pos, n));
+    }
+
+    /**
+     *  @brief  追加多个字符
+     *  @param  s  待插入的字符串指针
+     *  @param  n  待插入的字符的数量
+     *  @return  此字符串的引用
+     */
+    basic_string &append(CharType *s, size_type n) {
+        M_requires_string_len(s, n);
+        M_check_length(size_type(0), n, "basic_string::append");
+        return this->M_append(s, n);
+    }
+
     template <class InputIterator,
               typename std::enable_if<
                   easystl::is_input_iterator<InputIterator>::value,
@@ -1182,7 +1223,7 @@ struct basic_string {
     }
 
     /**
-     *  @brief  以多个字符替换范围内子字符串
+     *  @brief  以多个字符替换范围内字符串
      *  @param  iter1  范围起始位置指针
      *  @param  iter2  范围结束位置指针
      *  @param  n  插入的字符的数量
@@ -1195,6 +1236,14 @@ struct basic_string {
         return M_replace_aux(iter1 - begin(), iter2 - iter1, n, c);
     }
 
+    /**
+     *  @brief  以范围内字符串替换范围内字符串
+     *  @param  iter1  被替换范围起始位置指针
+     *  @param  iter2  被替换范围结束位置指针
+     *  @param  input_iter1  插入范围起始位置指针
+     *  @param  input_iter2  插入范围结束位置指针
+     *  @return  此字符串的引用
+     */
     template <
         typename InputIter,
         typename std::enable_if<easystl::is_input_iterator<InputIter>::vlaue,
@@ -1206,6 +1255,7 @@ struct basic_string {
                                   std::__false_type());
     }
 
+    // 对常规指针与迭代器的特化。
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           CharType *p1, CharType *p2) {
         EASYSTL_DEBUG(begin() <= iter1 && iter1 <= iter2 && iter2 <= end());
@@ -1232,6 +1282,13 @@ struct basic_string {
                              p2 - p1);
     }
 
+    /**
+     *  @brief  以 initializer_list 替换范围内字符
+     *  @param  iter1  被替换范围起始位置指针
+     *  @param  iter2  被替换范围结束位置指针
+     *  @param  l  initializer_list
+     *  @return  此字符串的引用
+     */
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           std::initializer_list<CharType> l) {
         return this->replace(iter1, iter2, l.begin(), l.end());
@@ -1262,6 +1319,13 @@ struct basic_string {
 
     basic_string &M_replace_aux(size_type pos1, size_type n1, size_type n2,
                                 CharType c);
+
+    basic_string &M_append(const CharType *s, size_type n);
+
+    void M_requires_string_len(const CharType *s, size_type n) {
+        EASYSTL_DEBUG(s != nullptr);
+        EASYSTL_DEBUG(CharTraits::length(s) >= n);
+    }
 
   public:
     const CharType *data() const noexcept { return M_data(); }
@@ -1595,6 +1659,24 @@ basic_string<CharType, CharTraits, Allocator>::M_replace(size_type pos,
         this->M_mutate(pos, len1, s, len2);
 
     this->M_set_length(new_size);
+    return *this;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+basic_string<CharType, CharTraits, Allocator> &
+basic_string<CharType, CharTraits, Allocator>::M_append(const CharType *s,
+                                                        size_type n) {
+    const size_type len = n + this->size();
+
+    if (len <= this->capacity()) {
+        if (n) {
+            this->S_copy(this->M_data() + this->size(), s, n);
+        }
+    } else {
+        this->M_mutate(this->size(), size_type(0), s, n);
+    }
+
+    this->M_set_length(len);
     return *this;
 }
 
