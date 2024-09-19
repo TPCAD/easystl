@@ -923,40 +923,79 @@ struct basic_string {
      *  @param  n  待插入的字符的数量
      *  @return  此字符串的引用
      */
-    basic_string &append(const basic_string &str, size_type pos, size_type n) {
+    basic_string &append(const basic_string &str, size_type pos,
+                         size_type n = npos) {
         return this->append(str.M_data() +
                                 str.M_check(pos, "basic_string::append"),
                             str.M_limit(pos, n));
     }
 
     /**
-     *  @brief  追加多个字符
+     *  @brief  追加部分 C 字符串
      *  @param  s  待插入的字符串指针
      *  @param  n  待插入的字符的数量
      *  @return  此字符串的引用
      */
-    basic_string &append(CharType *s, size_type n) {
+    basic_string &append(const CharType *s, size_type n) {
         M_requires_string_len(s, n);
         M_check_length(size_type(0), n, "basic_string::append");
         return this->M_append(s, n);
     }
 
+    /**
+     *  @brief  追加 C 字符串
+     *  @param  s  待插入的字符串指针
+     *  @return  此字符串的引用
+     */
+    basic_string &append(const CharType *s) {
+        M_requires_string(s);
+        size_type n = CharTraits::length(s);
+        M_check_length(size_type(0), n, "basic_string::append");
+        return this->M_append(s, n);
+    }
+
+    /**
+     *  @brief  追加多个相同字符
+     *  @param  n  待追加的字符的数量
+     *  @param  c  待追加的字符
+     *  @return  此字符串的引用
+     */
+    basic_string &append(size_type n, CharType c) {
+        return M_replace_aux(this->size(), size_type(0), n, c);
+    }
+
+    basic_string &append(std::initializer_list<CharType> l) {
+        return this->append(l.begin(), l.end());
+    }
+
+    /**
+     *  @brief  追加范围内字符
+     *  @param  first  范围开始迭代器
+     *  @param  end  范围结束迭代器
+     *  @return  此字符串的引用
+     */
     template <class InputIterator,
               typename std::enable_if<
                   easystl::is_input_iterator<InputIterator>::value,
                   bool>::type = true>
     basic_string &append(InputIterator first, InputIterator last) {
-        // TODO:
+        return this->replace(end(), end(), first, last);
     }
 
     /**
-     *  @brief  附加多个字符
-     *  @param  n  附加字符的数量
-     *  @param  c  附加的字符
-     *  @return  该字符串的引用
+     *  @brief  追加一个字符
+     *  @param  c  待追加的字符
+     *  @return  此字符串的引用
      */
-    basic_string &append(size_type n, CharType c) {
-        return M_replace_aux(this->size(), size_type(0), n, c);
+    void push_back(CharType c) {
+        const size_type size = this->size();
+        if (size + 1 > this->capacity()) {
+            // 只分配新内存并拷贝数据
+            this->M_mutate(size, size_type(0), 0, size_type(1));
+        }
+        // 追加新字符
+        CharTraits::assign(this->M_data()[size], c);
+        this->M_set_length(size + 1);
     }
 
     /**
@@ -1327,6 +1366,8 @@ struct basic_string {
         EASYSTL_DEBUG(CharTraits::length(s) >= n);
     }
 
+    void M_requires_string(const CharType *s) { EASYSTL_DEBUG(s != nullptr); }
+
   public:
     const CharType *data() const noexcept { return M_data(); }
 
@@ -1556,7 +1597,7 @@ void basic_string<CharType, CharTraits, Allocator>::reserve(size_type res) {
 }
 
 /**
- *  @brief  替换字符辅助函数
+ *  @brief  替换字符辅助函数，插入多个相同字符
  *  @param  pos  第一个需要替换的字符的索引
  *  @param  n1  被替换的字符的数量
  *  @param  n2  插入的字符的数量
