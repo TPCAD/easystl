@@ -1153,6 +1153,121 @@ struct basic_string {
     }
 
     /**
+     *  @brief  插入多个字符
+     *  @param  p  指向插入位置的常量迭代器
+     *  @param  n  插入字符的数量
+     *  @param  c  插入的字符
+     *  @return  此字符串的索引
+     */
+    iterator insert(const_iterator p, size_type n, CharType c) {
+        EASYSTL_DEBUG(p >= begin() && p <= end());
+        const size_type pos = p - begin();
+        this->replace(p, p, n, c);
+        return iterator(this->M_data() + pos);
+    }
+
+    /**
+     *  @brief  插入范围字符串
+     *  @param  p  指向插入位置的常量迭代器
+     *  @param  first  范围开始迭代器
+     *  @param  last  范围结束迭代器
+     *  @return  此字符串的索引
+     */
+    template <typename InputIterator,
+              typename std::enable_if<
+                  easystl::is_input_iterator<InputIterator>::value,
+                  bool>::type = true>
+    iterator insert(const_iterator p, InputIterator first, InputIterator last) {
+        EASYSTL_DEBUG(p >= begin() && p <= end());
+        const size_type pos = p - begin();
+        this->replace(p, p, first, last);
+        return iterator(this->M_data() + pos);
+    }
+
+    /**
+     *  @brief  插入字符的初始化列表
+     *  @param  p  指向插入位置的常量迭代器
+     *  @param  l  插入的初始化列表
+     *  @return  此字符串的索引
+     */
+    iterator insert(const_iterator p, std::initializer_list<CharType> l) {
+        return this->insert(p, l.begin(), l.end());
+    }
+
+    /**
+     *  @brief  插入另一字符串
+     *  @param  pos  插入位置的索引
+     *  @param  str  插入的字符串
+     *  @return  此字符串的引用
+     */
+    basic_string &insert(size_type pos, const basic_string &str) {
+        return this->replace(pos, size_type(0), str.M_data(), str.size());
+    }
+
+    /**
+     *  @brief  插入另一字符串的子字符串
+     *  @param  pos1  插入位置的索引
+     *  @param  str  插入的字符串
+     *  @param  pos2  子字符串起始位置索引
+     *  @param  n  插入的字符的数量
+     *  @return  此字符串的引用
+     */
+    basic_string &insert(size_type pos1, const basic_string &str,
+                         size_type pos2, size_type n = npos) {
+        return this->replace(pos1, size_type(0),
+                             str.M_data() +
+                                 str.M_check(pos2, "basic_string::insert"),
+                             str.M_limit(pos2, n));
+    }
+
+    /**
+     *  @brief  插入 C 风格字符串的子字符串
+     *  @param  pos1  插入位置的索引
+     *  @param  s  插入的字符串
+     *  @param  n  插入的字符的数量
+     *  @return  此字符串的引用
+     */
+    basic_string &insert(size_type pos1, const CharType *s, size_type n) {
+        return this->replace(pos1, size_type(0), s, n);
+    }
+
+    /**
+     *  @brief  插入 C 风格字符串
+     *  @param  pos1  插入位置的索引
+     *  @param  s  插入的字符串
+     *  @return  此字符串的引用
+     */
+    basic_string &insert(size_type pos1, const CharType *s) {
+        M_requires_string(s);
+        return this->replace(pos1, size_type(0), s, traits_type::length(s));
+    }
+
+    /**
+     *  @brief  插入多个字符
+     *  @param  pos  插入位置的索引
+     *  @param  n  插入的字符的数量
+     *  @param  c  插入字符
+     *  @return  此字符串的引用
+     */
+    basic_string &insert(size_type pos, size_type n, CharType c) {
+        return M_replace_aux(M_check(pos, "basic_string::insert"), size_type(0),
+                             n, c);
+    }
+
+    /**
+     *  @brief  插入一个字符
+     *  @param  pos  插入位置的索引
+     *  @param  c  插入字符
+     *  @return  此字符串的引用
+     */
+    iterator insert(const_iterator p, CharType c) {
+        EASYSTL_DEBUG(p >= begin() && p <= end());
+        const size_type pos = p - begin();
+        M_replace_aux(pos, size_type(0), size_type(1), c);
+        return iterator(M_data() + pos);
+    }
+
+    /**
      *  @brief  以另一字符串替换部分字符串
      *  @param  pos  第一个需替换的字符的索引
      *  @param  n1  被替换的字符的数量
