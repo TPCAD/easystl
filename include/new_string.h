@@ -1535,9 +1535,8 @@ struct basic_string {
 
     basic_string &M_append(const CharType *s, size_type n);
 
-    void M_requires_string_len(const CharType *s, size_type n) {
-        EASYSTL_DEBUG(s != nullptr);
-        EASYSTL_DEBUG(CharTraits::length(s) >= n);
+    void M_requires_string_len(const CharType *s, size_type n) const {
+        EASYSTL_DEBUG(s != nullptr || n == 0);
     }
 
     void M_requires_string(const CharType *s) { EASYSTL_DEBUG(s != nullptr); }
