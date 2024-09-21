@@ -1902,6 +1902,10 @@ TEST_F(BasicStringEraseOneCharTest, EraseEnd) {
     str.erase(str.end() - 1);
     EXPECT_EQ(str, "Hello, World");
 }
+TEST_F(BasicStringEraseOneCharTest, PopBack) {
+    str.pop_back();
+    EXPECT_EQ(str, "Hello, World");
+}
 
 // 3. iterator erase(const_iterator first, const_iterator last)
 class BasicStringEraseRangeCharsTest : public ::testing::Test {
