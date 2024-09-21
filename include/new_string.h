@@ -1709,8 +1709,8 @@ void basic_string<CharType, CharTraits, Allocator>::M_erase(size_type pos,
 
     if (how_much && n) {
         this->S_move(M_data() + pos, M_data() + pos + n, how_much);
-        M_set_length(length() - n);
     }
+    M_set_length(length() - n);
 }
 
 // operator==
