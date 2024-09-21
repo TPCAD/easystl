@@ -346,7 +346,11 @@ struct basic_string {
     void M_mutate(size_type pos, size_type len1, const CharType *s,
                   size_type len2);
 
-    // TODO: comment
+    /**
+     *  @brief  删除多个字符
+     *  @param  pos  待删除的第一个字符的索引
+     *  @param  n  待删除的字符数量
+     */
     void M_erase(size_type pos, size_type n);
 
   public:
@@ -1265,6 +1269,51 @@ struct basic_string {
         const size_type pos = p - begin();
         M_replace_aux(pos, size_type(0), size_type(1), c);
         return iterator(M_data() + pos);
+    }
+
+    /**
+     *  @brief  删除多个字符
+     *  @param  pos  待删除的第一个字符的索引
+     *  @param  n  待删除的字符的数量
+     *  @return  此字符串的引用
+     */
+    basic_string &erase(size_type pos, size_type n = npos) {
+        M_check(pos, "basic_string::erase");
+        if (n == npos) {
+            M_set_length(pos);
+        } else if (n != 0) {
+            this->M_erase(pos, M_limit(pos, n));
+        }
+        return *this;
+    }
+
+    /**
+     *  @brief  删除一个字符
+     *  @param  it  待删除的字符的索引
+     *  @return  指向删除后的相同位置的迭代器
+     */
+    iterator erase(const_iterator it) {
+        EASYSTL_DEBUG(it >= begin() && it < end());
+        const size_type pos = it - begin();
+        this->M_erase(pos, size_type(1));
+        return iterator(M_data() + pos);
+    }
+
+    /**
+     *  @brief  删除范围内字符
+     *  @param  first  范围起始位置迭代器
+     *  @param  last  范围结束位置迭代器
+     *  @return  指向删除后的相同起始位置的迭代器
+     */
+    iterator erase(const_iterator first, const_iterator last) {
+        EASYSTL_DEBUG(first >= begin() && first <= last && last <= end());
+        const size_type pos = first - begin();
+        if (last == end()) {
+            this->M_set_length(pos);
+        } else {
+            this->M_erase(pos, last - first);
+        }
+        return iterator(this->M_data() + pos);
     }
 
     /**
