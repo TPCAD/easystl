@@ -61,9 +61,7 @@ struct alloc_traits : std::allocator_traits<Alloc> {
         return base_type::select_on_container_copy_construction(a);
     }
 
-    static constexpr Alloc S_on_swap(Alloc &a, Alloc &b) {
-        return std::__alloc_on_swap(a, b);
-    }
+    static void S_on_swap(Alloc &a, Alloc &b) { std::__alloc_on_swap(a, b); }
 
     static constexpr bool S_propagate_on_copy_assign() {
         return base_type::propagate_on_container_copy_assignment::value;
