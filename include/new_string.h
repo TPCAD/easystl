@@ -1317,6 +1317,16 @@ struct basic_string {
     }
 
     /**
+     *  @brief  删除最后一个字符
+     *
+     *  字符串必须非空
+     */
+    void pop_back() noexcept {
+        EASYSTL_DEBUG(!empty());
+        this->M_erase(size() - 1, size_type(1));
+    }
+
+    /**
      *  @brief  以另一字符串替换部分字符串
      *  @param  pos  第一个需替换的字符的索引
      *  @param  n1  被替换的字符的数量
