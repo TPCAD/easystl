@@ -1543,7 +1543,25 @@ struct basic_string {
     void M_requires_string(const CharType *s) { EASYSTL_DEBUG(s != nullptr); }
 
   public:
+    /**
+     *  @brief  复制子字符串 C 字符串中
+     *  @param  s  C 字符串
+     *  @param  n  复制的字符的数量
+     *  @param  pos  第一个复制的字符的索引
+     *  @return  实际被复制的字符的数量
+     *  @throw  std::out_of_range  如果 pos > size()
+     */
+    size_type copy(CharType *s, size_type n, size_type pos = 0) const;
+
+    /**
+     *  @brief  与另一个字符串交换内容
+     *  @param  s  另一个字符串
+     */
+    void swap(basic_string &s) noexcept;
+
+    const CharType *c_str() const noexcept { return M_data(); }
     const CharType *data() const noexcept { return M_data(); }
+    CharType *data() noexcept { return M_data(); }
 
     allocator_type get_allocator() const noexcept { return M_get_allocator(); }
 };
@@ -1894,6 +1912,85 @@ basic_string<CharType, CharTraits, Allocator>::M_append(const CharType *s,
     this->M_set_length(len);
     return *this;
 }
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+basic_string<CharType, CharTraits, Allocator>::copy(CharType *s, size_type n,
+                                                    size_type pos) const {
+    M_check(pos, "basic_string::copy");
+    n = M_limit(pos, n);
+    M_requires_string_len(s, n);
+
+    if (n) {
+        S_copy(s, M_data() + pos, n);
+    }
+
+    return n;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+void basic_string<CharType, CharTraits, Allocator>::swap(
+    basic_string &s) noexcept {
+    if (this == easystl::address_of(s)) {
+        return;
+    }
+
+    alloc_traits::S_on_swap(M_get_allocator(), s.M_get_allocator());
+
+    if (M_is_local()) {
+        // 二者皆是小字符串
+        if (s.M_is_local()) {
+            // 二者皆不为空字符串
+            if (length() && s.length()) {
+                CharType tmp[S_local_capacity + 1];
+                traits_type::copy(tmp, s.M_local_buf, s.length() + 1);
+                traits_type::copy(s.M_local_buf, M_local_buf, length() + 1);
+                traits_type::copy(M_local_buf, tmp, s.length() + 1);
+            } else if (s.length()) { // 另一字符串不是空字符串
+                M_init_local_buf();
+                traits_type::copy(M_local_buf, s.M_local_buf, s.length() + 1);
+                M_length(s.length());
+                s.M_set_length(0);
+                return;
+            } else if (length()) { // 此字符串不是空字符串
+                s.M_init_local_buf();
+                traits_type::copy(s.M_local_buf, M_local_buf, length() + 1);
+                s.M_length(length());
+                M_set_length(0);
+                return;
+            }
+        } else { // 另一个字符串不是小字符串
+            const size_type tmp_capacity = s.M_allocated_capacity;
+            s.M_init_local_buf();
+            traits_type::copy(s.M_local_buf, M_local_buf, length() + 1);
+            M_data(s.M_data());
+            s.M_data(s.M_local_buf);
+            M_capacity(tmp_capacity);
+        }
+    } else { // 此字符串不是小字符串
+        const size_type tmp_capacity = M_allocated_capacity;
+
+        if (s.M_is_local()) { // 另一字符串是小字符串
+            M_init_local_buf();
+            traits_type::copy(M_local_buf, s.M_local_buf, s.length() + 1);
+            s.M_data(M_data());
+            M_data(M_local_buf);
+        } else { // 另一字符串不是小字符串
+            pointer tmp_ptr = M_data();
+            M_data(s.M_data());
+            s.M_data(tmp_ptr);
+            M_capacity(s.M_allocated_capacity);
+        }
+        s.M_capacity(tmp_capacity);
+    }
+    const size_type tmp_length = length();
+    M_length(s.length());
+    s.M_length(tmp_length);
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+constexpr typename basic_string<CharType, CharTraits, Allocator>::size_type
+    easystl::basic_string<CharType, CharTraits, Allocator>::npos;
 
 } // namespace easystl
 
