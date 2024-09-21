@@ -1835,3 +1835,103 @@ TEST_F(BasicStringInsertOneCharTest, InsertIntoEmptyString) {
     EXPECT_EQ(empty_str, "H");
 }
 } // namespace insert_test
+
+namespace erase_test {
+// 1. basic_string &erase(size_type pos, size_type n = npos)
+class BasicStringEraseMultipleCharsTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+    void SetUp() override { str = "Hello, World!"; }
+};
+TEST_F(BasicStringEraseMultipleCharsTest, EraseMiddle) {
+    str.erase(5, 2);
+    EXPECT_EQ(str, "HelloWorld!");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseBeginning) {
+    str.erase(0, 7);
+    EXPECT_EQ(str, "World!");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseEnd) {
+    str.erase(5);
+    EXPECT_EQ(str, "Hello");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseAll) {
+    str.erase(0);
+    EXPECT_TRUE(str.empty());
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseNone) {
+    str.erase(0, 0);
+    EXPECT_EQ(str, "Hello, World!");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseOutOfRange) {
+    EXPECT_THROW(str.erase(str.size() + 1), std::out_of_range);
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseBeyondEnd) {
+    str.erase(5, 100); // Should truncate at end of string
+    EXPECT_EQ(str, "Hello");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseWithNpos) {
+    str.erase(7, easystl::string::npos);
+    EXPECT_EQ(str, "Hello, ");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseMiddleMultipleTimes) {
+    str.erase(5, 1).erase(5, 1);
+    EXPECT_EQ(str, "HelloWorld!");
+}
+TEST_F(BasicStringEraseMultipleCharsTest, EraseFromEmptyString) {
+    easystl::string empty_str;
+    EXPECT_NO_THROW(empty_str.erase(0));
+    EXPECT_TRUE(empty_str.empty());
+}
+
+// 2. iterator erase(const_iterator it)
+class BasicStringEraseOneCharTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+    void SetUp() override { str = "Hello, World!"; }
+};
+TEST_F(BasicStringEraseOneCharTest, EraseMiddle) {
+    str.erase(str.begin() + 5);
+    EXPECT_EQ(str, "Hello World!");
+}
+TEST_F(BasicStringEraseOneCharTest, EraseBeginning) {
+    str.erase(str.begin() + 0);
+    EXPECT_EQ(str, "ello, World!");
+}
+TEST_F(BasicStringEraseOneCharTest, EraseEnd) {
+    str.erase(str.end() - 1);
+    EXPECT_EQ(str, "Hello, World");
+}
+
+// 3. iterator erase(const_iterator first, const_iterator last)
+class BasicStringEraseRangeCharsTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+    void SetUp() override { str = "Hello, World!"; }
+};
+TEST_F(BasicStringEraseRangeCharsTest, EraseMiddle) {
+    str.erase(str.begin() + 5, str.begin() + 7);
+    EXPECT_EQ(str, "HelloWorld!");
+}
+TEST_F(BasicStringEraseRangeCharsTest, EraseBeginning) {
+    str.erase(str.begin(), str.begin() + 7);
+    EXPECT_EQ(str, "World!");
+}
+TEST_F(BasicStringEraseRangeCharsTest, EraseEnd) {
+    str.erase(str.begin() + 5, str.end());
+    EXPECT_EQ(str, "Hello");
+}
+TEST_F(BasicStringEraseRangeCharsTest, EraseAll) {
+    str.erase(str.begin(), str.end());
+    EXPECT_TRUE(str.empty());
+}
+TEST_F(BasicStringEraseRangeCharsTest, EraseNone) {
+    str.erase(str.begin() + 2, str.begin() + 2);
+    EXPECT_EQ(str, "Hello, World!");
+}
+TEST_F(BasicStringEraseRangeCharsTest, EraseFromEmptyString) {
+    easystl::string empty_str;
+    empty_str.erase(empty_str.begin(), empty_str.end());
+    EXPECT_TRUE(empty_str.empty());
+}
+} // namespace erase_test
