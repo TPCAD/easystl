@@ -1939,3 +1939,110 @@ TEST_F(BasicStringEraseRangeCharsTest, EraseFromEmptyString) {
     EXPECT_TRUE(empty_str.empty());
 }
 } // namespace erase_test
+
+namespace swap_test {
+TEST(BasicStringSwapTest, SwapEmptyStrings) {
+    easystl::string s1;
+    easystl::string s2;
+    s1.swap(s2);
+    EXPECT_TRUE(s1.empty());
+    EXPECT_TRUE(s2.empty());
+}
+TEST(BasicStringSwapTest, SwapSmallStrings) {
+    easystl::string s1("hello");
+    easystl::string s2("world");
+    s1.swap(s2);
+    EXPECT_EQ(s1, "world");
+    EXPECT_EQ(s2, "hello");
+    EXPECT_EQ(s1.capacity(), 15);
+}
+TEST(BasicStringSwapTest, SmallStringSwapEmptyString) {
+    easystl::string s1("hello");
+    easystl::string s2;
+    s1.swap(s2);
+    EXPECT_TRUE(s1.empty());
+    EXPECT_EQ(s2, "hello");
+    EXPECT_EQ(s2.capacity(), 15);
+    EXPECT_EQ(s1.length(), 0);
+}
+TEST(BasicStringSwapTest, EmptyStringSwapSmallString) {
+    easystl::string s1("hello");
+    easystl::string s2;
+    s2.swap(s1);
+    EXPECT_TRUE(s1.empty());
+    EXPECT_EQ(s2, "hello");
+    EXPECT_EQ(s2.capacity(), 15);
+    EXPECT_EQ(s1.length(), 0);
+}
+TEST(BasicStringSwapTest, StringSwapSmallString) {
+    easystl::string s1(100, 'a');
+    easystl::string s2(10, 'b');
+    s1.swap(s2);
+    EXPECT_EQ(s1.capacity(), 15);
+    EXPECT_EQ(s2.capacity(), 100);
+}
+TEST(BasicStringSwapTest, SmallStringSwapString) {
+    easystl::string s1(100, 'a');
+    easystl::string s2(10, 'b');
+    s2.swap(s1);
+    EXPECT_EQ(s1.capacity(), 15);
+    EXPECT_EQ(s2.capacity(), 100);
+}
+TEST(BasicStringSwapTest, StringSwapString) {
+    easystl::string s1(200, 'a');
+    easystl::string s2(100, 'b');
+    s1.swap(s2);
+    EXPECT_EQ(s1.capacity(), 100);
+    EXPECT_EQ(s2.capacity(), 200);
+}
+TEST(BasicStringSwapTest, SwapSelfDoesNothing) {
+    easystl::string s1("Hello");
+    s1.swap(s1);
+    EXPECT_EQ(s1, "Hello");
+}
+} // namespace swap_test
+
+namespace copy_test {
+class BasicStringCopyTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World!"; }
+};
+
+TEST_F(BasicStringCopyTest, CopyEntireString) {
+    char buffer[20] = {0};
+    size_t copied = str.copy(buffer, str.length(), 0);
+
+    EXPECT_EQ(copied, str.length());
+    EXPECT_STREQ(buffer, str.c_str());
+}
+TEST_F(BasicStringCopyTest, CopyPartialString) {
+    char buffer[10] = {0};
+    size_t copied = str.copy(buffer, 5, 7);
+
+    EXPECT_EQ(copied, 5);
+    EXPECT_STREQ(buffer, "World");
+}
+
+TEST_F(BasicStringCopyTest, CopyWithPosOutOfRange) {
+    char buffer[10] = {0};
+    EXPECT_THROW(str.copy(buffer, 5, str.length() + 1), std::out_of_range);
+}
+
+TEST_F(BasicStringCopyTest, CopyZeroCharacters) {
+    char buffer[10] = {0};
+    size_t copied = str.copy(buffer, 0, 0);
+
+    EXPECT_EQ(copied, 0);
+    EXPECT_STREQ(buffer, "");
+}
+
+TEST_F(BasicStringCopyTest, CopyWithLargeN) {
+    char buffer[20] = {0};
+    size_t copied = str.copy(buffer, 100, 0);
+
+    EXPECT_EQ(copied, str.length());
+    EXPECT_STREQ(buffer, str.c_str());
+}
+} // namespace copy_test
