@@ -2196,4 +2196,35 @@ TEST_F(BasicStringRFindCStringTest, RFindSingleCharacter) {
     EXPECT_EQ(str.rfind("!", str.size(), 1), 24);
     EXPECT_EQ(str.rfind("!", 14, 1), 12);
 }
+
+// 2. size_type rfind(const basic_string &str, size_type pos = 0)
+class BasicStringRFindStringTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringRFindStringTest, FindFromEnd) {
+    EXPECT_EQ(str.rfind(easystl::string("World")), 7);
+    EXPECT_EQ(str.rfind(easystl::string("Hello")), 14);
+    EXPECT_EQ(str.rfind(easystl::string("C++")), 21);
+}
+TEST_F(BasicStringRFindStringTest, FindFromMiddle) {
+    EXPECT_EQ(str.rfind(easystl::string("Hello"), 13), 0);
+    EXPECT_EQ(str.rfind(easystl::string("World"), 13), 7);
+    EXPECT_EQ(str.rfind(easystl::string("C++", 13)), easystl::string::npos);
+}
+TEST_F(BasicStringRFindStringTest, FindNonExistentSubstring) {
+    EXPECT_EQ(str.rfind(easystl::string("Python")), easystl::string::npos);
+}
+TEST_F(BasicStringRFindStringTest, FindEmptySubstring) {
+    EXPECT_EQ(str.rfind(easystl::string("")), str.size());
+    EXPECT_EQ(str.rfind(easystl::string(""), 0), 0);
+    EXPECT_EQ(str.rfind(easystl::string(""), 13), 13);
+}
+TEST_F(BasicStringRFindStringTest, FindSingleCharacter) {
+    EXPECT_EQ(str.rfind(easystl::string("W"), str.size()), 7);
+    EXPECT_EQ(str.rfind(easystl::string("!"), str.size()), 24);
+    EXPECT_EQ(str.rfind(easystl::string("!"), 13), 12);
+}
 } // namespace rfind_test
