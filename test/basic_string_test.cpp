@@ -2173,3 +2173,35 @@ TEST_F(BasicStringFindCharTest, FindNullCharacter) {
     EXPECT_EQ(string_with_null.find('\0', 0), 5);
 }
 } // namespace find_test
+
+namespace rfind_test {
+// 1. size_type rfind(const CharType *s, size_type pos, size_type n)
+class BasicStringRFindCStringTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringRFindCStringTest, RFindFromEnd) {
+    EXPECT_EQ(str.rfind("World", str.size(), 5), 7);
+    EXPECT_EQ(str.rfind("C++", str.size(), 3), 21);
+    EXPECT_EQ(str.rfind("Hello", str.size(), 5), 14);
+}
+TEST_F(BasicStringRFindCStringTest, RFindFromMiddle) {
+    EXPECT_EQ(str.rfind("C++", 14, 3), easystl::string::npos);
+    EXPECT_EQ(str.rfind("Hello", 10, 5), 0);
+}
+TEST_F(BasicStringRFindCStringTest, RFindNonExistentSubstring) {
+    EXPECT_EQ(str.rfind("Python", str.size(), 6), easystl::string::npos);
+}
+TEST_F(BasicStringRFindCStringTest, RFindEmptySubstring) {
+    EXPECT_EQ(str.find("", 0, 4), easystl::string::npos);
+    EXPECT_EQ(str.find("", 5, 8), easystl::string::npos);
+    EXPECT_EQ(str.find("", str.size(), 4), easystl::string::npos);
+}
+TEST_F(BasicStringRFindCStringTest, RFindSingleCharacter) {
+    EXPECT_EQ(str.rfind("W", str.size(), 1), 7);
+    EXPECT_EQ(str.rfind("!", str.size(), 1), 24);
+    EXPECT_EQ(str.rfind("!", 14, 1), 12);
+}
+} // namespace rfind_test
