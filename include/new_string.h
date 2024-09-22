@@ -1591,13 +1591,21 @@ struct basic_string {
 
     /**
      *  @brief  查找 C 字符串
-     *  @param  param  desc
+     *  @param  s  待查找的 C 字符串
      *  @param  pos  查找开始位置
      *  @return  第一次出现 C 字符串时的第一个字符的索引
      */
     size_type find(const CharType *s, size_type pos = 0) const noexcept {
         return this->find(s, pos, traits_type::length(s));
     }
+
+    /**
+     *  @brief  查找字符
+     *  @param  c  待查找字符
+     *  @param  pos  查找开始位置
+     *  @return  第一次出现字符的位置的索引
+     */
+    size_type find(const CharType c, size_type pos = 0) const noexcept;
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -2051,6 +2059,23 @@ easystl::basic_string<CharType, CharTraits, Allocator>::find(
             return first - data;
         }
         len = last - (++first);
+    }
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::find(
+    const CharType c, size_type pos) const noexcept {
+    const size_type size = this->size();
+
+    if (pos < size) {
+        const CharType *data = M_data();
+        const size_type n = size - pos;
+        const CharType *p = traits_type::find(data + pos, n, c);
+        if (p) {
+            return p - data;
+        }
     }
     return npos;
 }
