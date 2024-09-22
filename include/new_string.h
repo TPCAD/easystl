@@ -1644,12 +1644,38 @@ struct basic_string {
     }
 
     /**
-     *  @brief  查找字符最后出现
+     *  @brief  查找字符最后出现位置
      *  @param  c  待查找字符
      *  @param  pos  查找开始位置
      *  @return  最后一次出现字符的索引
      */
     size_type rfind(const CharType c, size_type pos = npos) const noexcept;
+
+    /**
+     *  @brief  寻找第一次出现 C 字符串中字符的位置
+     *  @param  s  C 字符串
+     *  @param  pos  查找开始位置
+     *  @param  n  待查找的字符数量
+     *  @return  第一次出现 C 字符串中字符的位置索引
+     */
+    size_type find_first_of(const CharType *s, size_type pos,
+                            size_type n) const noexcept;
+
+    size_type find_first_of(const basic_string &str,
+                            size_type pos = 0) const noexcept {
+        return this->find_first_of(str.data(), pos, str.length());
+    }
+
+    size_type find_first_of(const CharType *s,
+                            size_type pos = 0) const noexcept {
+        M_requires_string(s);
+        return this->find_first_of(s, pos, traits_type::length(s));
+    }
+
+    size_type find_first_of(const CharType c,
+                            size_type pos = 0) const noexcept {
+        return this->find(c, pos);
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -2159,6 +2185,22 @@ easystl::basic_string<CharType, CharTraits, Allocator>::rfind(
             }
         }
     }
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::find_first_of(
+    const CharType *s, size_type pos, size_type n) const noexcept {
+    M_requires_string_len(s, n);
+
+    for (; n && pos < this->size(); ++pos) {
+        const CharType *p = traits_type::find(s, n, M_data()[pos]);
+        if (p) {
+            return pos;
+        }
+    }
+
     return npos;
 }
 
