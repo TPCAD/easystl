@@ -1596,6 +1596,7 @@ struct basic_string {
      *  @return  第一次出现 C 字符串时的第一个字符的索引
      */
     size_type find(const CharType *s, size_type pos = 0) const noexcept {
+        M_requires_string(s);
         return this->find(s, pos, traits_type::length(s));
     }
 
