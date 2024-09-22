@@ -2362,3 +2362,33 @@ TEST_F(BasicStringFindLastOfTest, FindLastOfWithNullCharacter) {
               11); // Finds the null character
 }
 } // namespace find_last_of_test
+
+namespace find_first_not_of_test {
+TEST(BasicStringFindFirstNotOfTest, FindFirstNotOf) {
+    const char *pattern = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                          "abcdefghijklmnopqrstuvwxyz"
+                          "0123456789";
+
+    easystl::string data = "1) %FIX, 2) %HACK, 3) %TODO";
+    const easystl::string replacement = "%DONE%";
+
+    for (easystl::string::size_type first{}, last{};
+         (first = data.find('%', first)) != easystl::string::npos;
+         first += replacement.size()) {
+        last = data.find_first_not_of(pattern, first + 1);
+        if (last == easystl::string::npos)
+            last = data.length();
+
+        // 现在 first 位于 '%'，而 last 位于找到的子串的尾后位置
+        data.replace(first, last - first, replacement);
+    }
+
+    EXPECT_EQ(data, "1) %DONE%, 2) %DONE%, 3) %DONE%");
+}
+TEST(BasicStringFindFirstNotOfTest, FindFirstNotOfSingleChar) {
+    const easystl::string str("Hello World!");
+
+    EXPECT_EQ(str.find_first_not_of('a'), 0);
+    EXPECT_EQ(str.find_first_not_of('l', 2), 4);
+}
+} // namespace find_first_not_of_test
