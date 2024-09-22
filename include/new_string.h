@@ -1707,7 +1707,7 @@ struct basic_string {
      *  @param  s  C 字符串
      *  @param  pos  查找开始位置
      *  @param  n  待查找的字符数量
-     *  @return  第一次出现 C 字符串中字符的位置索引
+     *  @return  首个不等于给定字符序列中任何字符的字符索引
      */
     size_type find_first_not_of(const CharType *s, size_type pos,
                                 size_type n) const noexcept;
@@ -1731,6 +1731,29 @@ struct basic_string {
      */
     size_type find_first_not_of(const CharType c,
                                 size_type pos = 0) const noexcept;
+
+    /**
+     *  @brief  查找最后一个不等于给定字符序列中任何字符的字符
+     *  @param  s  C 字符串
+     *  @param  pos  查找开始位置
+     *  @param  n  待查找的字符数量
+     *  @return  最后一个不等于给定字符序列中任何字符的字符
+     */
+    size_type find_last_not_of(const CharType *s, size_type pos,
+                               size_type n) const noexcept;
+
+    size_type find_last_not_of(const basic_string &str,
+                               size_type pos = npos) const noexcept {
+        return this->find_last_not_of(str.data(), pos, str.size());
+    }
+
+    size_type find_last_not_of(const CharType *s,
+                               size_type pos = npos) const noexcept {
+        M_requires_string(s);
+        return this->find_last_not_of(s, pos, traits_type::length(s));
+    }
+
+    size_type find_last_not_of(CharType c, size_type pos = npos) const noexcept;
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -2304,6 +2327,47 @@ easystl::basic_string<CharType, CharTraits, Allocator>::find_first_not_of(
         if (!traits_type::eq(M_data()[pos], c)) {
             return pos;
         }
+    }
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::find_last_not_of(
+    const CharType *s, size_type pos, size_type n) const noexcept {
+    M_requires_string_len(s, n);
+    size_type size = this->size();
+
+    if (size) {
+        if (--size > pos) {
+            size = pos;
+        }
+        do {
+            if (!traits_type::find(s, n, M_data()[size])) {
+                return size;
+            }
+        } while (size-- != 0);
+    }
+
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::find_last_not_of(
+    CharType c, size_type pos) const noexcept {
+
+    size_type size = this->size();
+
+    if (size) {
+        if (--size > pos) {
+            size = pos;
+        }
+        do {
+            if (!traits_type::eq(M_data()[size], c)) {
+                return size;
+            }
+        } while (size-- != 0);
     }
     return npos;
 }
