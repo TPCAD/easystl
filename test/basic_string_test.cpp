@@ -2102,13 +2102,13 @@ class BasicStringFindStringTest : public ::testing::Test {
 
     void SetUp() override { str = "Hello, World! Hello, C++!"; }
 };
-TEST_F(BasicStringFindStringTest, FindSimpleSubstring) {
-    EXPECT_EQ(str.find(easystl::string("World"), 0), 7);
-    EXPECT_EQ(str.find(easystl::string("Hello"), 0), 0);
-    EXPECT_EQ(str.find(easystl::string("C++"), 0), 21);
+TEST_F(BasicStringFindStringTest, FindFromStart) {
+    EXPECT_EQ(str.find(easystl::string("World")), 7);
+    EXPECT_EQ(str.find(easystl::string("Hello")), 0);
+    EXPECT_EQ(str.find(easystl::string("C++")), 21);
 }
-TEST_F(BasicStringFindStringTest, FindWithStartPosition) {
-    EXPECT_EQ(str.find(easystl::string("Hello"), 1), 14);
+TEST_F(BasicStringFindStringTest, FindFromMiddle) {
+    EXPECT_EQ(str.find(easystl::string("Hello"), 10), 14);
     EXPECT_EQ(str.find(easystl::string("World"), 8), easystl::string::npos);
 }
 TEST_F(BasicStringFindStringTest, FindNonExistentSubstring) {
