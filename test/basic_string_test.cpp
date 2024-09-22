@@ -2392,3 +2392,18 @@ TEST(BasicStringFindFirstNotOfTest, FindFirstNotOfSingleChar) {
     EXPECT_EQ(str.find_first_not_of('l', 2), 4);
 }
 } // namespace find_first_not_of_test
+
+namespace find_last_not_of_test {
+TEST(BasicStringFindLastNotOfTest, FindLastNotOfCString) {
+    easystl::string str{"Hello World World"};
+    EXPECT_EQ(str.find_last_not_of("dlr", str.size(), 3), 13);
+    EXPECT_EQ(str.find_last_not_of("dlr", str.size() / 2, 3), 7);
+    EXPECT_EQ(str.find_last_not_of("Hello World", str.size(), 11),
+              easystl::string::npos);
+    EXPECT_EQ(str.find_last_not_of("o", str.size() + 2, 11), 16);
+}
+TEST(BasicStringFindLastNotOfTest, FindLastNotOfSingleChar) {
+    easystl::string str{"aaabaaa"};
+    EXPECT_EQ(str.find_last_not_of('a'), 3);
+}
+} // namespace find_last_not_of_test
