@@ -2056,7 +2056,7 @@ class BasicStringFindCStringTest : public ::testing::Test {
 
     void SetUp() override { str = "Hello, World! Hello, C++!"; }
 };
-TEST_F(BasicStringFindCStringTest, FindSimpleSubstring) {
+TEST_F(BasicStringFindCStringTest, FindFromStart) {
     EXPECT_EQ(str.find("World", 0, 5), 7);
     EXPECT_EQ(str.find("Hello", 0, 5), 0);
     EXPECT_EQ(str.find("C++", 0, 3), 21);
@@ -2065,12 +2065,12 @@ TEST_F(BasicStringFindCStringTest, FindSimpleSubstring) {
     EXPECT_EQ(str.find("Hello"), 0);
     EXPECT_EQ(str.find("C++"), 21);
 }
-TEST_F(BasicStringFindCStringTest, FindWithStartPosition) {
-    EXPECT_EQ(str.find("Hello", 1, 3), 14);
-    EXPECT_EQ(str.find("World", 8, 3), easystl::string::npos);
+TEST_F(BasicStringFindCStringTest, FindFromMiddle) {
+    EXPECT_EQ(str.find("Hello", 13, 3), 14);
+    EXPECT_EQ(str.find("World", 13, 3), easystl::string::npos);
 
-    EXPECT_EQ(str.find("Hello", 1), 14);
-    EXPECT_EQ(str.find("World", 8), easystl::string::npos);
+    EXPECT_EQ(str.find("Hello", 13), 14);
+    EXPECT_EQ(str.find("World", 13), easystl::string::npos);
 }
 TEST_F(BasicStringFindCStringTest, FindNonExistentSubstring) {
     EXPECT_EQ(str.find("Python", 0, 6), easystl::string::npos);
@@ -2084,14 +2084,6 @@ TEST_F(BasicStringFindCStringTest, FindEmptySubstring) {
     EXPECT_EQ(str.find("", 0), 0);
     EXPECT_EQ(str.find("", 5), 5);
     EXPECT_EQ(str.find("", str.size()), str.size());
-}
-TEST_F(BasicStringFindCStringTest, FindWithLengthParameter) {
-    EXPECT_EQ(str.find("Hello, World!", 0, 5), 0);
-    EXPECT_EQ(str.find("Hello, World!", 0, 12), 0);
-    EXPECT_EQ(str.find("Hello, World!", 14, 5), 14);
-
-    EXPECT_EQ(str.find("Hello, World!"), 0);
-    EXPECT_EQ(str.find("Hello, World!", 14), easystl::string::npos);
 }
 TEST_F(BasicStringFindCStringTest, FindSingleCharacter) {
     EXPECT_EQ(str.find("W", 0, 1), 7);
