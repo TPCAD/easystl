@@ -1539,7 +1539,9 @@ struct basic_string {
         EASYSTL_DEBUG(s != nullptr || n == 0);
     }
 
-    void M_requires_string(const CharType *s) { EASYSTL_DEBUG(s != nullptr); }
+    void M_requires_string(const CharType *s) const {
+        EASYSTL_DEBUG(s != nullptr);
+    }
 
   public:
     /**
