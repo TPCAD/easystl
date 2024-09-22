@@ -1606,6 +1606,19 @@ struct basic_string {
      *  @return  第一次出现字符的位置的索引
      */
     size_type find(const CharType c, size_type pos = 0) const noexcept;
+
+    /**
+     *  @brief  查找 C 字符串的最后出现的位置
+     *  @param  s  待查找的 C 字符串
+     *  @param  pos  查找开始位置
+     *  @param  n  待查找的字符数量
+     *  @return  第一次出现 C 字符串时的第一个字符的索引
+     *
+     *  在此字符串中从 @a pos 开始向前查找前 @a n 个在 @a s
+     *  中的字符，若找到则返回第一 个字符的索引，若找不到则返回 npos。
+     */
+    size_type rfind(const CharType *s, size_type pos,
+                    size_type n) const noexcept;
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -2076,6 +2089,25 @@ easystl::basic_string<CharType, CharTraits, Allocator>::find(
         if (p) {
             return p - data;
         }
+    }
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::rfind(
+    const CharType *s, size_type pos, size_type n) const noexcept {
+    M_requires_string_len(s, n);
+    const size_type size = this->size();
+
+    if (n <= size) {
+        pos = easystl::min(size_type(size - n), pos);
+        const CharType *data = M_data();
+        do {
+            if (traits_type::compare(data + pos, s, n) == 0) {
+                return pos;
+            }
+        } while (pos-- > 0);
     }
     return npos;
 }
