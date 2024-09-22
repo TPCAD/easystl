@@ -2046,3 +2046,40 @@ TEST_F(BasicStringCopyTest, CopyWithLargeN) {
     EXPECT_STREQ(buffer, str.c_str());
 }
 } // namespace copy_test
+
+namespace find_test {
+// size_type find(const CharType *s, size_type pos, size_type n)
+class BasicStringFindCStringTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringFindCStringTest, FindSimpleSubstring) {
+    EXPECT_EQ(str.find("World", 0, 5), 7);
+    EXPECT_EQ(str.find("Hello", 0, 5), 0);
+    EXPECT_EQ(str.find("C++", 0, 3), 21);
+}
+TEST_F(BasicStringFindCStringTest, FindWithStartPosition) {
+    EXPECT_EQ(str.find("Hello", 1, 3), 14);
+    EXPECT_EQ(str.find("World", 8, 3), easystl::string::npos);
+}
+TEST_F(BasicStringFindCStringTest, FindNonExistentSubstring) {
+    EXPECT_EQ(str.find("Python", 0, 6), easystl::string::npos);
+}
+TEST_F(BasicStringFindCStringTest, FindEmptySubstring) {
+    EXPECT_EQ(str.find("", 0, 4), easystl::string::npos);
+    EXPECT_EQ(str.find("", 5, 8), easystl::string::npos);
+    EXPECT_EQ(str.find("", str.size(), 4), easystl::string::npos);
+}
+TEST_F(BasicStringFindCStringTest, FindWithLengthParameter) {
+    EXPECT_EQ(str.find("Hello, World!", 0, 5), 0);
+    EXPECT_EQ(str.find("Hello, World!", 0, 12), 0);
+    EXPECT_EQ(str.find("Hello, World!", 14, 5), 14);
+}
+TEST_F(BasicStringFindCStringTest, FindSingleCharacter) {
+    EXPECT_EQ(str.find("W", 0, 1), 7);
+    EXPECT_EQ(str.find("!", 0, 1), 12);
+    EXPECT_EQ(str.find("!", 13, 1), 24);
+}
+} // namespace find_test
