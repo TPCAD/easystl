@@ -1563,6 +1563,19 @@ struct basic_string {
     CharType *data() noexcept { return M_data(); }
 
     allocator_type get_allocator() const noexcept { return M_get_allocator(); }
+
+    /**
+     *  @brief  查找 C 字符串的位置
+     *  @param  s  待查找的 C 字符串
+     *  @param  pos  查找开始位置
+     *  @param  n  待查找的字符数量
+     *  @return  第一次出现 C 字符串的第一个字符的索引
+     *
+     *  在此字符串中从 @a pos 开始查找前 @a n 个在 @a s
+     * 中的字符，若找到则返回第一 个字符的索引，若找不到则返回 npos。
+     */
+    size_type find(const CharType *s, size_type pos,
+                   size_type n) const noexcept;
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -1985,6 +1998,39 @@ void basic_string<CharType, CharTraits, Allocator>::swap(
     const size_type tmp_length = length();
     M_length(s.length());
     s.M_length(tmp_length);
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::find(
+    const CharType *s, size_type pos, size_type n) const noexcept {
+    M_requires_string_len(s, n);
+    const size_type size = this->size();
+
+    if (n == 0) {
+        return pos <= size ? pos : npos;
+    }
+    if (pos >= size) {
+        return npos;
+    }
+
+    const CharType elem0 = s[0];
+    const CharType *const data = this->data();
+    const CharType *first = data + pos;
+    const CharType *const last = data + size;
+    size_type len = size - pos;
+
+    while (len >= n) {
+        first = traits_type::find(first, len - n + 1, elem0);
+        if (!first) {
+            return npos;
+        }
+        if (traits_type::compare(first, s, n) == 0) {
+            return first - data;
+        }
+        len = last - (++first);
+    }
+    return npos;
 }
 
 template <typename CharType, typename CharTraits, typename Allocator>
