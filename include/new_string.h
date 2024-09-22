@@ -1612,13 +1612,24 @@ struct basic_string {
      *  @param  s  待查找的 C 字符串
      *  @param  pos  查找开始位置
      *  @param  n  待查找的字符数量
-     *  @return  第一次出现 C 字符串时的第一个字符的索引
+     *  @return  最后一次出现 C 字符串时的第一个字符的索引
      *
      *  在此字符串中从 @a pos 开始向前查找前 @a n 个在 @a s
-     *  中的字符，若找到则返回第一 个字符的索引，若找不到则返回 npos。
+     *  中的字符，若找到则返回第一个字符的索引，若找不到则返回 npos。
      */
     size_type rfind(const CharType *s, size_type pos,
                     size_type n) const noexcept;
+
+    /**
+     *  @brief  查找字符串的最后出现的位置
+     *  @param  str  待查找的字符串
+     *  @param  pos  查找开始位置
+     *  @return  最后一次出现字符串时的第一个字符的索引
+     */
+    size_type rfind(const basic_string &str,
+                    size_type pos = npos) const noexcept {
+        return this->rfind(str.M_data(), pos, str.size());
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
