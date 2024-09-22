@@ -2275,3 +2275,50 @@ TEST_F(BasicStringRFindCharTest, FindNullCharacter) {
     EXPECT_EQ(string_with_null.rfind('\0'), 5);
 }
 } // namespace rfind_test
+
+namespace find_first_of_test {
+class BasicStringFindFirstOfTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfFromStart) {
+    EXPECT_EQ(str.find_first_of("aeiou", 0, 3), 1); // 'e' in "Hello"
+    EXPECT_EQ(str.find_first_of("xyz", 0, 3), easystl::string::npos);
+}
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfSingleChar) {
+    EXPECT_EQ(str.find_first_of("H", 0, 1), 0);
+    EXPECT_EQ(str.find_first_of("H", 6, 1), 14); // Second "Hello"
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfMultipleMatches) {
+    EXPECT_EQ(str.find_first_of("ol", 0, 2), 2); // 'l' in "Hello"
+    EXPECT_EQ(str.find_first_of("ol", 3, 2), 3); // 'o' in "Hello"
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfNoMatch) {
+    EXPECT_EQ(str.find_first_of("xyz", 0, 3), easystl::string::npos);
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfEmptySearchString) {
+    EXPECT_EQ(str.find_first_of("", 0), easystl::string::npos);
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfWithPosOutOfRange) {
+    EXPECT_EQ(str.find_first_of("Hello", str.size()), easystl::string::npos);
+    EXPECT_EQ(str.find_first_of("Hello", str.size() + 1),
+              easystl::string::npos);
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfInEmptyString) {
+    easystl::string empty_string;
+    EXPECT_EQ(empty_string.find_first_of("abc", 0), easystl::string::npos);
+}
+
+TEST_F(BasicStringFindFirstOfTest, FindFirstOfWithNullCharacter) {
+    easystl::string string_with_null("Hello\0World", 11);
+    EXPECT_EQ(string_with_null.find_first_of("d\0", 0, 2),
+              5); // Finds the null character
+}
+} // namespace find_first_of_test
