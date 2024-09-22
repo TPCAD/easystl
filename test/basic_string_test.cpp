@@ -2135,4 +2135,41 @@ TEST_F(BasicStringFindStringTest, FindSingleCharacter) {
     EXPECT_EQ(str.find(easystl::string("!"), 0), 12);
     EXPECT_EQ(str.find(easystl::string("!"), 13), 24);
 }
+
+// 4. size_type find(const CharType c, size_type pos = 0)
+class BasicStringFindCharTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringFindCharTest, FindSingleCharacter) {
+    EXPECT_EQ(str.find('H'), 0);
+    EXPECT_EQ(str.find('o'), 4);
+    EXPECT_EQ(str.find('!'), 12);
+    EXPECT_EQ(str.find(','), 5);
+}
+TEST_F(BasicStringFindCharTest, FindSingleCharacterWithStartPos) {
+    EXPECT_EQ(str.find('H', 1), 14);
+    EXPECT_EQ(str.find('o', 5), 8);
+    EXPECT_EQ(str.find('!', 13), 24);
+}
+TEST_F(BasicStringFindCharTest, FindNonExistentCharacter) {
+    EXPECT_EQ(str.find('z', 0), easystl::string::npos);
+}
+TEST_F(BasicStringFindCharTest, FindCharacterAtEndOfString) {
+    EXPECT_EQ(str.find('!', 24), 24);
+}
+TEST_F(BasicStringFindCharTest, FindCharacterWithOutOfRangePos) {
+    EXPECT_EQ(str.find('H', str.size()), easystl::string::npos);
+    EXPECT_EQ(str.find('H', str.size() + 1), easystl::string::npos);
+}
+TEST_F(BasicStringFindCharTest, FindCharacterInEmptyString) {
+    easystl::string empty_string;
+    EXPECT_EQ(empty_string.find('a', 0), easystl::string::npos);
+}
+TEST_F(BasicStringFindCharTest, FindNullCharacter) {
+    easystl::string string_with_null("Hello\0World", 11);
+    EXPECT_EQ(string_with_null.find('\0', 0), 5);
+}
 } // namespace find_test
