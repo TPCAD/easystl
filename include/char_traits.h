@@ -160,7 +160,7 @@ template <> struct char_traits<char> {
         if (n == 0) {
             return 0;
         }
-        return static_cast<const char_type *>(std::memchr(s, n, c));
+        return static_cast<const char_type *>(std::memchr(s, c, n));
     }
 
     static char_type *move(char_type *dest, const char_type *src, size_t n) {
