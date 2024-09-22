@@ -1569,13 +1569,23 @@ struct basic_string {
      *  @param  s  待查找的 C 字符串
      *  @param  pos  查找开始位置
      *  @param  n  待查找的字符数量
-     *  @return  第一次出现 C 字符串的第一个字符的索引
+     *  @return  第一次出现 C 字符串时的第一个字符的索引
      *
      *  在此字符串中从 @a pos 开始查找前 @a n 个在 @a s
      * 中的字符，若找到则返回第一 个字符的索引，若找不到则返回 npos。
      */
     size_type find(const CharType *s, size_type pos,
                    size_type n) const noexcept;
+
+    /**
+     *  @brief  查找字符串
+     *  @param  str  待查找的字符串
+     *  @param  pos  查找开始位置
+     *  @return  第一次出现字符串时的第一个字符的索引
+     */
+    size_type find(const basic_string &str, size_type pos = 0) const noexcept {
+        return this->find(str.data(), pos, str.length());
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
