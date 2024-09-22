@@ -1642,6 +1642,14 @@ struct basic_string {
         M_requires_string(s);
         return this->rfind(s, pos, traits_type::length(s));
     }
+
+    /**
+     *  @brief  查找字符最后出现
+     *  @param  c  待查找字符
+     *  @param  pos  查找开始位置
+     *  @return  最后一次出现字符的索引
+     */
+    size_type rfind(const CharType c, size_type pos = npos) const noexcept;
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
@@ -2131,6 +2139,25 @@ easystl::basic_string<CharType, CharTraits, Allocator>::rfind(
                 return pos;
             }
         } while (pos-- > 0);
+    }
+    return npos;
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+typename basic_string<CharType, CharTraits, Allocator>::size_type
+easystl::basic_string<CharType, CharTraits, Allocator>::rfind(
+    const CharType c, size_type pos) const noexcept {
+    size_type size = this->size();
+
+    if (size) {
+        if (--size > pos) {
+            size = pos;
+        }
+        for (++size; size-- > 0;) {
+            if (traits_type::eq(M_data()[size], c)) {
+                return size;
+            }
+        }
     }
     return npos;
 }
