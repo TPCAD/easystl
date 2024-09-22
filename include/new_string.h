@@ -1630,6 +1630,17 @@ struct basic_string {
                     size_type pos = npos) const noexcept {
         return this->rfind(str.M_data(), pos, str.size());
     }
+
+    /**
+     *  @brief  查找 C 字符串的最后出现的位置
+     *  @param  s  待查找的 C 字符串
+     *  @param  pos  查找开始位置
+     *  @return  最后一次出现 C 字符串时的第一个字符的索引
+     */
+    size_type rfind(const CharType *s, size_type pos = npos) const noexcept {
+        M_requires_string(s);
+        return this->rfind(s, pos, traits_type::length(s));
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
