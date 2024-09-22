@@ -2322,3 +2322,43 @@ TEST_F(BasicStringFindFirstOfTest, FindFirstOfWithNullCharacter) {
               5); // Finds the null character
 }
 } // namespace find_first_of_test
+
+namespace find_last_of_test {
+class BasicStringFindLastOfTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringFindLastOfTest, FindLastOfFromStart) {
+    EXPECT_EQ(str.find_last_of("aeiou", str.size(), 5),
+              18); // 'o' in second "Hello"
+    EXPECT_EQ(str.find_last_of("xyz", str.size(), 3), easystl::string::npos);
+}
+TEST_F(BasicStringFindLastOfTest, FindLastOfSingleChar) {
+    EXPECT_EQ(str.find_last_of("H", str.size(), 1), 14);
+    EXPECT_EQ(str.find_last_of("H", 6, 1), 0); // first "Hello"
+}
+
+TEST_F(BasicStringFindLastOfTest, FindLastOfMultipleMatches) {
+    EXPECT_EQ(str.find_last_of("ol", str.size(), 2), 18);     // 'l' in "Hello"
+    EXPECT_EQ(str.find_last_of("ol", str.size() / 2, 2), 10); // 'o' in "World"
+}
+
+TEST_F(BasicStringFindLastOfTest, FindLastOfNoMatch) {
+    EXPECT_EQ(str.find_last_of("xyz", 0, 3), easystl::string::npos);
+}
+
+TEST_F(BasicStringFindLastOfTest, FindLastOfEmptySearchString) {
+    EXPECT_EQ(str.find_last_of("", 0), easystl::string::npos);
+}
+TEST_F(BasicStringFindLastOfTest, FindLastOfInEmptyString) {
+    easystl::string empty_string;
+    EXPECT_EQ(empty_string.find_last_of("abc", 0, 3), easystl::string::npos);
+}
+TEST_F(BasicStringFindLastOfTest, FindLastOfWithNullCharacter) {
+    easystl::string string_with_null("Hello\0World\0", 12);
+    EXPECT_EQ(string_with_null.find_last_of("\0d", str.size(), 2),
+              11); // Finds the null character
+}
+} // namespace find_last_of_test
