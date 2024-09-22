@@ -1588,6 +1588,16 @@ struct basic_string {
     size_type find(const basic_string &str, size_type pos = 0) const noexcept {
         return this->find(str.data(), pos, str.length());
     }
+
+    /**
+     *  @brief  查找 C 字符串
+     *  @param  param  desc
+     *  @param  pos  查找开始位置
+     *  @return  第一次出现 C 字符串时的第一个字符的索引
+     */
+    size_type find(const CharType *s, size_type pos = 0) const noexcept {
+        return this->find(s, pos, traits_type::length(s));
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
