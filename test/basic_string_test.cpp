@@ -2407,3 +2407,45 @@ TEST(BasicStringFindLastNotOfTest, FindLastNotOfSingleChar) {
     EXPECT_EQ(str.find_last_not_of('a'), 3);
 }
 } // namespace find_last_not_of_test
+
+namespace substr_test {
+class BasicStringSubstrTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World! Hello, C++!"; }
+};
+TEST_F(BasicStringSubstrTest, SubstrEntireString) {
+    EXPECT_EQ(str.substr(), "Hello, World! Hello, C++!");
+}
+TEST_F(BasicStringSubstrTest, SubstrFromPosition) {
+    EXPECT_EQ(str.substr(7), "World! Hello, C++!");
+}
+TEST_F(BasicStringSubstrTest, SubstrWithLength) {
+    EXPECT_EQ(str.substr(0, 5), "Hello");
+    EXPECT_EQ(str.substr(7, 5), "World");
+}
+TEST_F(BasicStringSubstrTest, SubstrEmptyResult) {
+    EXPECT_EQ(str.substr(str.size()), "");
+}
+TEST_F(BasicStringSubstrTest, SubstrWithExcessiveLength) {
+    EXPECT_EQ(str.substr(0, 100), "Hello, World! Hello, C++!");
+}
+TEST_F(BasicStringSubstrTest, SubstrFromEmptyString) {
+    easystl::string empty_string;
+    EXPECT_EQ(empty_string.substr(), "");
+    EXPECT_EQ(empty_string.substr(0, 10), "");
+}
+TEST_F(BasicStringSubstrTest, SubstrWithNpos) {
+    EXPECT_EQ(str.substr(0, easystl::string::npos),
+              "Hello, World! Hello, C++!");
+    EXPECT_EQ(str.substr(7, easystl::string::npos), "World! Hello, C++!");
+}
+TEST_F(BasicStringSubstrTest, SubstrInvalidPos) {
+    EXPECT_THROW(str.substr(str.size() + 1), std::out_of_range);
+}
+TEST_F(BasicStringSubstrTest, SubstrWithNullCharacter) {
+    easystl::string string_with_null("Hello\0World", 11);
+    EXPECT_EQ(string_with_null.substr(5, 6), easystl::string("\0World", 6));
+}
+} // namespace substr_test
