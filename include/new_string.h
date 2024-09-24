@@ -1754,6 +1754,10 @@ struct basic_string {
     }
 
     size_type find_last_not_of(CharType c, size_type pos = npos) const noexcept;
+
+    basic_string substr(size_type pos = 0, size_type n = npos) const {
+        return basic_string(*this, M_check(pos, "basic_string::substr"), n);
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
