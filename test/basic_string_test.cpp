@@ -2654,4 +2654,97 @@ TEST_F(BasicStringStrCompareCStrTest, CompareWithNullCharacter) {
 TEST_F(BasicStringStrCompareCStrTest, CompareCaseSensitive) {
     EXPECT_NE(str.compare("hello, world!"), 0);
 }
+
+// 5. int compare(size_type pos, size_type n, const CharType *s)
+class BasicStringSubStrCompareCStrTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World!"; }
+};
+TEST_F(BasicStringSubStrCompareCStrTest, CompareEqual) {
+    EXPECT_EQ(str.compare(0, 5, "Hello"), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareLessThan) {
+    // not equal length
+    EXPECT_LT(str.compare(0, 7, "Hello, World! Extra"), 0);
+
+    EXPECT_LT(str.compare(0, 13, "Hello, Worle! Extra"), 0);
+
+    // equal length
+    EXPECT_LT(str.compare(0, str.size(), "Hello, Worlg!"), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareGreaterThan) {
+    // not equal length
+    EXPECT_GT(str.compare(0, str.size(), "Hello, Worl"), 0);
+
+    EXPECT_GT(str.compare(0, 10, "Helln, World! Extra"), 0);
+
+    // equal length
+    EXPECT_GT(str.compare(0, str.size(), "Hello, Worlc!"), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareEmptyString) {
+    EXPECT_GT(str.compare(0, 3, ""), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareSameObject) {
+    EXPECT_EQ(str.compare(0, str.size(), str.data()), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareWithNullCharacter) {
+    easystl::string str1("Hello\0World", 11);
+    EXPECT_GT(str1.compare(0, str.size(), "Hello\0Venus"), 0);
+}
+TEST_F(BasicStringSubStrCompareCStrTest, CompareCaseSensitive) {
+    EXPECT_NE(str.compare(0, 5, "hello"), 0);
+}
+
+// 6. int compare(size_type pos, size_type n1, const CharType *s, size_type n2)
+class BasicStringSubStrCompareCSubStrTest : public ::testing::Test {
+  protected:
+    easystl::string str;
+
+    void SetUp() override { str = "Hello, World!"; }
+};
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareEqual) {
+    easystl::string str1("Hello, World!");
+    EXPECT_EQ(str.compare(8, 5, "orld!", 5), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareLessThan) {
+    // not equal length
+    easystl::string str1("Hello, World! Extra");
+    EXPECT_LT(str.compare(0, 7, "Hello, World! Extra", 10), 0);
+
+    easystl::string str2("Hello, Worle! Extra");
+    EXPECT_LT(str.compare(0, 13, "Hello, Worle! Extra", 19), 0);
+
+    // equal length
+    easystl::string str3("Hello, Worlg!");
+    EXPECT_LT(str.compare(0, str.size(), "Hello, Worlg!", 13), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareGreaterThan) {
+    // not equal length
+    easystl::string str1("Hello, Worl");
+    EXPECT_GT(str.compare(0, str.size(), "Hello, Worl", 5), 0);
+
+    easystl::string str2("Helln, World! Extra");
+    EXPECT_GT(str.compare(2, 8, "lln, World! Extra", 19), 0);
+
+    // equal length
+    easystl::string str3("Hello, Worlc!");
+    EXPECT_GT(str.compare(0, str.size(), "Hello, Worlc!", 13), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareEmptyString) {
+    EXPECT_GT(str.compare(0, 3, "", 0), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareSameObject) {
+    EXPECT_EQ(str.compare(0, str.size(), str.data(), str.size()), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareWithNullCharacter) {
+    easystl::string str1("Hello\0World", 11);
+    easystl::string str2("Hello\0Venus", 11);
+    EXPECT_GT(str1.compare(0, 8, "Hello\0Venus", 8), 0);
+}
+TEST_F(BasicStringSubStrCompareCSubStrTest, CompareCaseSensitive) {
+    easystl::string str1("hello");
+    EXPECT_NE(str.compare(0, 5, "hello", 5), 0);
+}
 } // namespace compare_test
