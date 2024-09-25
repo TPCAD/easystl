@@ -1758,6 +1758,77 @@ struct basic_string {
     basic_string substr(size_type pos = 0, size_type n = npos) const {
         return basic_string(*this, M_check(pos, "basic_string::substr"), n);
     }
+
+    /**
+     *  @brief  与字符串比较
+     *  @param  str  待比较的字符串
+     *  @return  return
+     */
+    int compare(basic_string &str) const {
+        const size_type tsize = this->size();
+        const size_type osize = str.size();
+        const size_type len = easystl::min(tsize, osize);
+
+        int r = traits_type::compare(M_data(), str.data(), len);
+        if (!r) {
+            r = this->S_compare(tsize, osize);
+        }
+        return r;
+    }
+
+    /**
+     *  @brief  子字符串字符串比较
+     *  @param  param  desc
+     *  @return  return
+     */
+    int compare(size_type pos, size_type n, basic_string &str) const {
+        M_check(pos, "basic_string::compare");
+        n = M_limit(pos, n);
+        const size_type osize = str.size();
+        const size_type len = easystl::min(n, osize);
+
+        int r = traits_type::compare(M_data() + pos, str.data(), len);
+        if (!r) {
+            r = this->S_compare(n, osize);
+        }
+        return r;
+    }
+
+    /**
+     *  @brief  子字符串子字符串比较
+     *  @param  param  desc
+     *  @return  return
+     */
+    int compare(size_type pos1, size_type n1, basic_string &str, size_type pos2,
+                size_type n2 = npos) const {
+        M_check(pos1, "basic_string::compare");
+        str.M_check(pos2, "basic_string::compare");
+        n1 = M_limit(pos1, n1);
+        n2 = M_limit(pos2, n2);
+        const size_type len = easystl::min(n1, n2);
+
+        int r = traits_type::compare(M_data() + pos1, str.data() + pos2, len);
+        if (!r)
+            r = S_compare(n1, n2);
+        return r;
+    }
+
+    /**
+     *  @brief  与 C 字符串比较
+     *  @param  param  desc
+     *  @return  return
+     */
+    int compare(const CharType *s) const noexcept {
+        M_requires_string(s);
+        const size_type tsize = this->size();
+        const size_type osize = traits_type::length(s);
+        const size_type len = easystl::min(tsize, osize);
+
+        int r = traits_type::compare(M_data(), s, len);
+        if (!r)
+            r = S_compare(tsize, osize);
+        return r;
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
