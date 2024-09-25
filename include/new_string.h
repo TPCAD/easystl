@@ -1829,6 +1829,42 @@ struct basic_string {
             r = S_compare(tsize, osize);
         return r;
     }
+
+    /**
+     *  @brief  子字符串与 C 字符串比较
+     *  @param  param  desc
+     *  @return  return
+     */
+    int compare(size_type pos, size_type n, const CharType *s) const {
+        M_requires_string(s);
+        M_check(pos, "basic_string::compare");
+        n = M_limit(pos, n);
+        const size_type osize = traits_type::length(s);
+        const size_type len = easystl::min(n, osize);
+
+        int r = traits_type::compare(M_data() + pos, s, len);
+        if (!r)
+            r = S_compare(n, osize);
+        return r;
+    }
+
+    /**
+     *  @brief  子字符串与字符数组比较
+     *  @param  param  desc
+     *  @return  return
+     */
+    int compare(size_type pos, size_type n1, const CharType *s,
+                size_type n2) const {
+        M_requires_string_len(s, n2);
+        M_check(pos, "basic_string::compare");
+        n1 = M_limit(pos, n1);
+        const size_type len = easystl::min(n1, n2);
+
+        int r = traits_type::compare(M_data() + pos, s, len);
+        if (!r)
+            r = S_compare(n1, n2);
+        return r;
+    }
 };
 
 template <typename CharType, typename CharTraits, typename Allocator>
