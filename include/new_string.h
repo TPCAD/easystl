@@ -1867,6 +1867,190 @@ struct basic_string {
     }
 };
 
+template <typename Str>
+inline Str
+str_concat(typename Str::value_type const *lhs, typename Str::size_type lhs_len,
+           typename Str::value_type const *rhs, typename Str::size_type rhs_len,
+           typename Str::allocator_type const &a) {
+    typedef typename Str::allocator_type allocator_type;
+    typedef easystl::alloc_traits<allocator_type> alloc_traits;
+
+    Str str(alloc_traits::S_select_on_copy(a));
+    str.reserve(lhs_len + rhs_len);
+    str.append(lhs, lhs_len);
+    str.append(rhs, rhs_len);
+    return str;
+}
+
+/**
+ *  @brief  连接两个字符串
+ *  @param  lhs  第一个字符串
+ *  @param  rhs  第二个字符串
+ *  @return  拼接后的新字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) {
+    typedef basic_string<CharType, CharTraits, Allocator> Str;
+    return easystl::str_concat<Str>(lhs.c_str(), lhs.size(), rhs.c_str(),
+                                    rhs.size(), lhs.get_allocator());
+}
+
+/**
+ *  @brief  连接 C 字符串和字符串
+ *  @param  lhs  第一个字符串
+ *  @param  rhs  第二个字符串
+ *  @return  拼接后的新字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const CharType *lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) {
+    typedef basic_string<CharType, CharTraits, Allocator> Str;
+    return easystl::str_concat<Str>(lhs, CharTraits::length(lhs), rhs.c_str(),
+                                    rhs.size(), rhs.get_allocator());
+}
+
+/**  @brief  连接字符和字符串
+ *  @param  lhs  第一个字符串
+ *  @param  rhs  第二个字符串
+ *  @return  拼接后的新字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(CharType lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) {
+    typedef basic_string<CharType, CharTraits, Allocator> Str;
+    return easystl::str_concat<Str>(easystl::address_of(lhs), 1, rhs.c_str(),
+                                    rhs.size(), rhs.get_allocator());
+}
+
+/**
+ *  @brief  连接字符串和 C 字符串
+ *  @param  lhs  第一个字符串
+ *  @param  rhs  第二个字符串
+ *  @return  拼接后的新字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          const CharType *rhs) {
+
+    easystl_require_string(rhs);
+    typedef basic_string<CharType, CharTraits, Allocator> Str;
+    return easystl::str_concat<Str>(lhs.c_str(), lhs.size(), rhs,
+                                    CharTraits::length(rhs),
+                                    lhs.get_allocator());
+}
+
+/**
+ *  @brief  连接字符串和字符
+ *  @param  lhs  第一个字符串
+ *  @param  rhs  第二个字符串
+ *  @return  拼接后的新字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          const CharType rhs) {
+
+    typedef basic_string<CharType, CharTraits, Allocator> Str;
+    return easystl::str_concat<Str>(lhs.c_str(), lhs.size(),
+                                    easystl::address_of(rhs), 1,
+                                    lhs.get_allocator());
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(basic_string<CharType, CharTraits, Allocator> &&lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) {
+    return easystl::move(lhs.append(rhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          basic_string<CharType, CharTraits, Allocator> &&rhs) {
+    return easystl::move(rhs.insert(0, lhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(basic_string<CharType, CharTraits, Allocator> &&lhs,
+          basic_string<CharType, CharTraits, Allocator> &&rhs) {
+    using alloc_traits = std::allocator_traits<Allocator>;
+    bool use_rhs = false;
+    if (typename alloc_traits::is_always_equal{}) {
+        use_rhs = true;
+    } else if (lhs.get_allocator() == rhs.get_allocator()) {
+        use_rhs = true;
+    }
+    if (use_rhs) {
+        const auto size = lhs.size() + rhs.size();
+        if (size > lhs.capacity() && size <= rhs.capacity()) {
+            return easystl::move(rhs.insert(0, lhs));
+        }
+    }
+    return easystl::move(lhs.append(rhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(const CharType *lhs,
+          basic_string<CharType, CharTraits, Allocator> &&rhs) {
+    return easystl::move(rhs.insert(0, lhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(CharType lhs, basic_string<CharType, CharTraits, Allocator> &&rhs) {
+    return easystl::move(rhs.insert(0, 1, lhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(basic_string<CharType, CharTraits, Allocator> &&lhs,
+          const CharType *rhs) {
+    return easystl::move(lhs.append(rhs));
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
+inline basic_string<CharType, CharTraits, Allocator>
+operator+(basic_string<CharType, CharTraits, Allocator> &&lhs, CharType rhs) {
+    return easystl::move(lhs.append(1, rhs));
+}
+
+// operator==
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return lhs.size() == rhs.size() &&
+           !CharTraits::compare(lhs.data(), rhs.data(), lhs.size());
+}
+
+// operator==
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return !(lhs == rhs);
+}
+
+/**
+ *  @brief  Test equivalence of string and C string.
+ *  @param __lhs  String.
+ *  @param __rhs  C string.
+ *  @return  True if @a __lhs.compare(@a __rhs) == 0.  False otherwise.
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                       const CharType *rhs) {
+    return lhs.size() == CharTraits::length(rhs) &&
+           !CharTraits::compare(lhs.data(), rhs, lhs.size());
+}
+
 template <typename CharType, typename CharTraits, typename Allocator>
 typename basic_string<CharType, CharTraits, Allocator>::pointer
 basic_string<CharType, CharTraits, Allocator>::M_create(
@@ -2040,36 +2224,6 @@ void basic_string<CharType, CharTraits, Allocator>::M_erase(size_type pos,
         this->S_move(M_data() + pos, M_data() + pos + n, how_much);
     }
     M_set_length(length() - n);
-}
-
-// operator==
-template <typename CharType, typename CharTraits, typename Allocator>
-inline bool
-operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
-           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
-    return lhs.size() == rhs.size() &&
-           !CharTraits::compare(lhs.data(), rhs.data(), lhs.size());
-}
-
-// operator==
-template <typename CharType, typename CharTraits, typename Allocator>
-inline bool
-operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
-           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-/**
- *  @brief  Test equivalence of string and C string.
- *  @param __lhs  String.
- *  @param __rhs  C string.
- *  @return  True if @a __lhs.compare(@a __rhs) == 0.  False otherwise.
- */
-template <typename CharType, typename CharTraits, typename Allocator>
-inline bool operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
-                       const CharType *rhs) {
-    return lhs.size() == CharTraits::length(rhs) &&
-           !CharTraits::compare(lhs.data(), rhs, lhs.size());
 }
 
 template <typename CharType, typename CharTraits, typename Allocator>
