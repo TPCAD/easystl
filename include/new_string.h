@@ -2233,6 +2233,18 @@ operator>=(const CharType *lhs,
     return rhs.compare(lhs) <= 0;
 }
 
+/**
+ *  @brief  交换两个字符串的内容
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline void swap(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                 const basic_string<CharType, CharTraits, Allocator>
+                     &rhs) noexcept(noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
+}
+
 template <typename CharType, typename CharTraits, typename Allocator>
 typename basic_string<CharType, CharTraits, Allocator>::pointer
 basic_string<CharType, CharTraits, Allocator>::M_create(
