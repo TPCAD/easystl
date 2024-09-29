@@ -13,6 +13,7 @@
 #include <functional>
 #include <initializer_list>
 #include <limits>
+#include <ostream>
 #include <stdexcept>
 #include <type_traits>
 
@@ -2243,6 +2244,23 @@ inline void swap(const basic_string<CharType, CharTraits, Allocator> &lhs,
                  const basic_string<CharType, CharTraits, Allocator>
                      &rhs) noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
+}
+
+/**
+ *  @brief  将字符串写入到流中
+ *  @param  os  输出流
+ *  @param  str  字符串
+ *  @return  输出流的引用
+ *
+ *  FIX: 该方法没有为模板 basic_ostream 指定 _Traits 参数。若使用 CharTraits
+ *  会导致函数无法使用 std::cout，因为 std::cout 使用了标准库的 char_traits 作
+ *  为 _Traits 的默认参数。
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline std::basic_ostream<CharType> &
+operator<<(std::basic_ostream<CharType> &os,
+           const basic_string<CharType, CharTraits, Allocator> &str) {
+    return std::__ostream_insert(os, str.data(), str.size());
 }
 
 template <typename CharType, typename CharTraits, typename Allocator>
