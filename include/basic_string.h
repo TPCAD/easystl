@@ -46,8 +46,8 @@ struct basic_string {
 
     // typedef value_type *iterator;
     // typedef const value_type *const_iterator;
-    typedef easystl::normal_iterator<pointer, basic_string> iterator;
-    typedef easystl::normal_iterator<const_pointer, basic_string>
+    typedef easystl_cxx::normal_iterator<pointer, basic_string> iterator;
+    typedef easystl_cxx::normal_iterator<const_pointer, basic_string>
         const_iterator;
     typedef easystl::reverse_iterator<iterator> reverse_iterator;
     typedef easystl::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -2246,6 +2246,8 @@ inline void swap(const basic_string<CharType, CharTraits, Allocator> &lhs,
     lhs.swap(rhs);
 }
 
+// TODO: operator>>
+
 /**
  *  @brief  将字符串写入到流中
  *  @param  os  输出流
@@ -2262,6 +2264,8 @@ operator<<(std::basic_ostream<CharType> &os,
            const basic_string<CharType, CharTraits, Allocator> &str) {
     return std::__ostream_insert(os, str.data(), str.size());
 }
+
+// TODO: getline
 
 template <typename CharType, typename CharTraits, typename Allocator>
 typename basic_string<CharType, CharTraits, Allocator>::pointer

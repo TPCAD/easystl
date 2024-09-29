@@ -313,6 +313,9 @@ bool operator>=(const reverse_iterator<Iterator> &lhs,
     return !(lhs < rhs);
 }
 
+} // namespace easystl
+namespace easystl_cxx {
+
 template <typename Iterator, typename Container> class normal_iterator {
   protected:
     Iterator M_current;
@@ -499,11 +502,11 @@ operator+(typename normal_iterator<Iterator, Container>::difference_type n,
 
 template <typename Iterator, typename Container>
 constexpr auto
-to_address(const easystl::normal_iterator<Iterator, Container> &it) noexcept
+to_address(const easystl_cxx::normal_iterator<Iterator, Container> &it) noexcept
     -> decltype(easystl::to_address(it.base())) {
     return easystl::to_address(it.base());
 }
 
-} // namespace easystl
+} // namespace easystl_cxx
 
 #endif // !EASYSTL_ITERATOR_H
