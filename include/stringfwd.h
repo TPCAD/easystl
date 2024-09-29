@@ -3,7 +3,7 @@
 
 // 定义了 string, wstring, u16string, u32string 类型
 
-#include "new_string.h"
+#include "basic_string.h"
 
 namespace easystl {
 

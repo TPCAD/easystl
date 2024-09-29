@@ -1,5 +1,5 @@
-#include "astring.h"
 #include "char_traits.h"
+#include "stringfwd.h"
 #include "utility.h"
 #include "gtest/gtest.h"
 #include <climits>
