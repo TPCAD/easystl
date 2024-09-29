@@ -2093,6 +2093,146 @@ inline bool operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
     return !(lhs == rhs);
 }
 
+/**
+ *  @brief  判断字符串是否小于字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator<(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return lhs.compare(rhs) < 0;
+}
+
+/**
+ *  @brief  判断字符串是否小于 C 字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator<(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                      const CharType *rhs) noexcept {
+    return lhs.compare(rhs) < 0;
+}
+
+/**
+ *  @brief  判断 C 字符串是否小于字符串
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator<(const CharType *lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return rhs.compare(lhs) > 0;
+}
+
+/**
+ *  @brief  判断字符串是否大于字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator>(const basic_string<CharType, CharTraits, Allocator> &lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return lhs.compare(rhs) > 0;
+}
+
+/**
+ *  @brief  判断字符串是否大于 C 字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator>(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                      const CharType *rhs) noexcept {
+    return lhs.compare(rhs) > 0;
+}
+
+/**
+ *  @brief  判断 C 字符串是否大于字符串
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator>(const CharType *lhs,
+          const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return rhs.compare(lhs) < 0;
+}
+
+/**
+ *  @brief  判断字符串是否小于等于字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator<=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return lhs.compare(rhs) <= 0;
+}
+
+/**
+ *  @brief  判断字符串是否小于等于 C 字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator<=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                       const CharType *rhs) noexcept {
+    return lhs.compare(rhs) <= 0;
+}
+
+/**
+ *  @brief  判断 C 字符串是否小于等于字符串
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator<=(const CharType *lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return rhs.compare(lhs) >= 0;
+}
+
+/**
+ *  @brief  判断字符串是否大于字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator>=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return lhs.compare(rhs) >= 0;
+}
+
+/**
+ *  @brief  判断字符串是否大于 C 字符串
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator>=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                       const CharType *rhs) noexcept {
+    return lhs.compare(rhs) >= 0;
+}
+
+/**
+ *  @brief  判断 C 字符串是否大于字符串
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator>=(const CharType *lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return rhs.compare(lhs) <= 0;
+}
+
 template <typename CharType, typename CharTraits, typename Allocator>
 typename basic_string<CharType, CharTraits, Allocator>::pointer
 basic_string<CharType, CharTraits, Allocator>::M_create(
