@@ -23,6 +23,10 @@ namespace easystl {
 #define THROW_RUNTIME_ERROR_IF(expr, what)                                     \
     if ((expr))                                                                \
     throw std::runtime_error(what)
+
+#define easystl_require_string(string) assert((string) != nullptr)
+#define easystl_require_string_len(string, len)                                \
+    assert((string) != nullptr || (len) == 0)
 } // namespace easystl
 
 #endif // !EASYSTL_EXCEPTDEF_H
