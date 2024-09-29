@@ -1,5 +1,6 @@
 #include "astring.h"
 #include "char_traits.h"
+#include "utility.h"
 #include "gtest/gtest.h"
 #include <climits>
 #include <cstring>
@@ -2748,3 +2749,95 @@ TEST_F(BasicStringSubStrCompareCSubStrTest, CompareCaseSensitive) {
     EXPECT_NE(str.compare(0, 5, "hello", 5), 0);
 }
 } // namespace compare_test
+
+namespace operator_plus_test {
+TEST(BasicStringOperatorPlusTest, StrConcatStr) {
+    easystl::string str1("Hello ");
+    easystl::string str2("World");
+    easystl::string str3("");
+    easystl::string str4("\0");
+    EXPECT_EQ(str1 + str2, "Hello World");
+    EXPECT_EQ(str1 + str3, "Hello ");
+    EXPECT_EQ(str1 + str4, "Hello \0");
+}
+TEST(BasicStringOperatorPlusTest, CStrAndStr) {
+    const char *str1 = "Hello ";
+    easystl::string str2("World");
+    easystl::string str3("");
+    easystl::string str4("\0");
+    EXPECT_EQ(str1 + str2, "Hello World");
+    EXPECT_EQ(str1 + str3, "Hello ");
+
+    easystl::string tmp1 = str1 + str4;
+    EXPECT_EQ(tmp1.size(), 6);
+
+    EXPECT_EQ(str2 + str1, "WorldHello ");
+    EXPECT_EQ(str3 + str1, "Hello ");
+
+    easystl::string tmp2 = str4 + str1;
+    EXPECT_EQ(tmp2.size(), 6);
+}
+TEST(BasicStringOperatorPlusTest, CharAndStr) {
+    const char ch = 'H';
+    easystl::string str2("World");
+    easystl::string str3("");
+    easystl::string str4("\0");
+    EXPECT_EQ(ch + str2, "HWorld");
+    EXPECT_EQ(ch + str3, "H");
+
+    easystl::string tmp1 = ch + str4;
+    EXPECT_EQ(tmp1.size(), 1);
+
+    EXPECT_EQ(str2 + ch, "WorldH");
+    EXPECT_EQ(str3 + ch, "H");
+
+    easystl::string tmp2 = str4 + ch;
+    EXPECT_EQ(tmp2.size(), 1);
+}
+TEST(BasicStringOperatorPlusTest, MoveStrConcatStr) {
+    easystl::string str1("Hello");
+    easystl::string str2("World");
+    EXPECT_EQ(easystl::move(str1) + str2, "HelloWorld");
+    EXPECT_EQ(str1.size(), 0);
+    EXPECT_NE(str2.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, MoveStrConcatCStr) {
+    easystl::string str1("Hello");
+    const char *str2 = "World";
+    EXPECT_EQ(easystl::move(str1) + str2, "HelloWorld");
+    EXPECT_EQ(str1.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, MoveStrConcatChar) {
+    easystl::string str1("Hello");
+    const char ch = '!';
+    EXPECT_EQ(easystl::move(str1) + ch, "Hello!");
+    EXPECT_EQ(str1.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, MoveStrConcatMoveStr) {
+    easystl::string str1("Hello");
+    easystl::string str2("World");
+    EXPECT_EQ(easystl::move(str1) + easystl::move(str2), "HelloWorld");
+    EXPECT_EQ(str1.size(), 0);
+    EXPECT_NE(str2.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, CStrConcatMoveStr) {
+    const char *str1 = "Hello";
+    easystl::string str2("World");
+    EXPECT_EQ(str1 + easystl::move(str2), "HelloWorld");
+    EXPECT_EQ(str2.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, CharConcatMoveStr) {
+    const char ch = 'H';
+    easystl::string str2("World");
+    EXPECT_EQ(ch + easystl::move(str2), "HWorld");
+    EXPECT_EQ(str2.size(), 0);
+}
+TEST(BasicStringOperatorPlusTest, StrConcatMoveStr) {
+    easystl::string str1("Hello");
+    easystl::string str2("World");
+    EXPECT_EQ(str1 + easystl::move(str2), "HelloWorld");
+    EXPECT_NE(str1.size(), 0);
+    EXPECT_EQ(str2.size(), 0);
+}
+
+} // namespace operator_plus_test
