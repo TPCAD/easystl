@@ -2021,7 +2021,11 @@ operator+(basic_string<CharType, CharTraits, Allocator> &&lhs, CharType rhs) {
     return easystl::move(lhs.append(1, rhs));
 }
 
-// operator==
+/**
+ *  @brief  判断字符串字符串是否相等
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
 template <typename CharType, typename CharTraits, typename Allocator>
 inline bool
 operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
@@ -2030,7 +2034,35 @@ operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
            !CharTraits::compare(lhs.data(), rhs.data(), lhs.size());
 }
 
-// operator==
+/**
+ *  @brief  判断字符串与 C 字符串是否相等
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                       const CharType *rhs) noexcept {
+    return lhs.size() == CharTraits::length(rhs) &&
+           !CharTraits::compare(lhs.data(), rhs, lhs.size());
+}
+
+/**
+ *  @brief  判断 C 字符串与字符串是否相等
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool
+operator==(const CharType *lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return rhs == lhs;
+}
+
+/**
+ *  @brief  判断字符串与字符串是否不相等
+ *  @param  lhs  字符串
+ *  @param  rhs  字符串
+ */
 template <typename CharType, typename CharTraits, typename Allocator>
 inline bool
 operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
@@ -2039,16 +2071,26 @@ operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
 }
 
 /**
- *  @brief  Test equivalence of string and C string.
- *  @param __lhs  String.
- *  @param __rhs  C string.
- *  @return  True if @a __lhs.compare(@a __rhs) == 0.  False otherwise.
+ *  @brief  判断 C 字符串与字符串是否不相等
+ *  @param  lhs  C 字符串
+ *  @param  rhs  字符串
  */
 template <typename CharType, typename CharTraits, typename Allocator>
-inline bool operator==(const basic_string<CharType, CharTraits, Allocator> &lhs,
-                       const CharType *rhs) {
-    return lhs.size() == CharTraits::length(rhs) &&
-           !CharTraits::compare(lhs.data(), rhs, lhs.size());
+inline bool
+operator!=(const CharType *lhs,
+           const basic_string<CharType, CharTraits, Allocator> &rhs) noexcept {
+    return !(rhs == lhs);
+}
+
+/**
+ *  @brief  判断字符串与 C 字符串是否不相等
+ *  @param  lhs  字符串
+ *  @param  rhs  C 字符串
+ */
+template <typename CharType, typename CharTraits, typename Allocator>
+inline bool operator!=(const basic_string<CharType, CharTraits, Allocator> &lhs,
+                       const CharType *rhs) noexcept {
+    return !(lhs == rhs);
 }
 
 template <typename CharType, typename CharTraits, typename Allocator>
