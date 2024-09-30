@@ -1,21 +1,9 @@
 #ifndef EASYSTL_BASIC_STRING_H
 #define EASYSTL_BASIC_STRING_H
 
-#include "algobase.h"
-#include "alloc_traits.h"
 #include "allocator.h"
 #include "char_traits.h"
-#include "exceptdef.h"
-#include "iterator.h"
-#include "memory.h"
-#include <cassert>
-#include <cstring>
-#include <functional>
-#include <initializer_list>
 #include <limits>
-#include <ostream>
-#include <stdexcept>
-#include <type_traits>
 
 namespace easystl {
 
@@ -44,8 +32,6 @@ struct basic_string {
     typedef typename alloc_traits::pointer pointer;
     typedef typename alloc_traits::const_pointer const_pointer;
 
-    // typedef value_type *iterator;
-    // typedef const value_type *const_iterator;
     typedef easystl_cxx::normal_iterator<pointer, basic_string> iterator;
     typedef easystl_cxx::normal_iterator<const_pointer, basic_string>
         const_iterator;
@@ -550,9 +536,7 @@ struct basic_string {
      *  @param  __a  Allocator to use (default is default allocator).
      */
     template <typename InputIterator,
-              typename std::enable_if<
-                  easystl::is_input_iterator<InputIterator>::value,
-                  bool>::type = true>
+              typename = easystl::RequireInputIter<InputIterator>>
     basic_string(InputIterator beg, InputIterator end,
                  const Allocator &a = Allocator())
         : M_dataplus(M_local_data(), a), M_string_length(0) {
@@ -980,9 +964,7 @@ struct basic_string {
      *  @return  此字符串的引用
      */
     template <class InputIterator,
-              typename std::enable_if<
-                  easystl::is_input_iterator<InputIterator>::value,
-                  bool>::type = true>
+              typename = easystl::RequireInputIter<InputIterator>>
     basic_string &append(InputIterator first, InputIterator last) {
         return this->replace(end(), end(), first, last);
     }
@@ -1124,10 +1106,7 @@ struct basic_string {
      *
      *  Sets value of string to characters in the range [__first,__last).
      */
-    template <
-        class InputIterator,
-        typename std::enable_if<
-            easystl::is_input_iterator<InputIterator>::value, int>::type = 0>
+    template <class InputIterator, easystl::RequireInputIter<InputIterator>>
     basic_string &assign(InputIterator first, InputIterator last) {
         if (std::__is_one_of<InputIterator, const_iterator, iterator,
                              const CharType *, CharType *>::value) {
@@ -1179,9 +1158,7 @@ struct basic_string {
      *  @return  此字符串的索引
      */
     template <typename InputIterator,
-              typename std::enable_if<
-                  easystl::is_input_iterator<InputIterator>::value,
-                  bool>::type = true>
+              typename = easystl::RequireInputIter<InputIterator>>
     iterator insert(const_iterator p, InputIterator first, InputIterator last) {
         EASYSTL_DEBUG(p >= begin() && p <= end());
         const size_type pos = p - begin();
@@ -1458,10 +1435,8 @@ struct basic_string {
      *  @param  input_iter2  插入范围结束位置指针
      *  @return  此字符串的引用
      */
-    template <
-        typename InputIter,
-        typename std::enable_if<easystl::is_input_iterator<InputIter>::vlaue,
-                                bool>::type = true>
+    template <typename InputIter,
+              typename = easystl::RequireInputIter<InputIter>>
     basic_string &replace(const_iterator iter1, const_iterator iter2,
                           InputIter input_iter1, InputIter input_iter2) {
         EASYSTL_DEBUG(begin() <= iter1 && iter1 <= iter2 && iter2 <= end());
