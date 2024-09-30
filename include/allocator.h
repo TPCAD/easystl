@@ -2,7 +2,6 @@
 #define EASYSTL_ALLOCATOR_H
 
 #include "construct.h"
-#include "utility.h"
 
 namespace easystl {
 
