@@ -1,10 +1,8 @@
 #ifndef EASYSTL_ITERATOR_H
 #define EASYSTL_ITERATOR_H
 
-#include "type_traits.h"
-#include <alloc_traits.h>
-#include <cstddef>
-#include <type_traits>
+#include "alloc_traits.h"
+#include "exceptdef.h"
 
 namespace easystl {
 
@@ -25,45 +23,65 @@ struct iterator {
     typedef Distance difference_type;
 };
 
-// 检查是否拥有 iterator_category 成员
-template <class T> struct has_iterator_cat {
-  private:
-    struct two {
-        char a;
-        char b;
-    };
-    template <class U> static two test(...);
-    template <class U> static char test(typename U::iterator_category * = 0);
+template <typename Iterator, typename = std::__void_t<>>
+struct iterator_traits_helper {};
 
-  public:
-    static const bool value = sizeof(test<T>(0)) == sizeof(char);
-};
-
-template <class Iterator, bool> struct iterator_traits_impl {};
-
-template <class Iterator> struct iterator_traits_impl<Iterator, true> {
+template <typename Iterator>
+struct iterator_traits_helper<
+    Iterator,
+    std::__void_t<typename Iterator::iterator_category,
+                  typename Iterator::value_type,
+                  typename Iterator::difference_type,
+                  typename Iterator::pointer, typename Iterator::reference>> {
     typedef typename Iterator::iterator_category iterator_category;
     typedef typename Iterator::value_type value_type;
+    typedef typename Iterator::difference_type difference_type;
     typedef typename Iterator::pointer pointer;
     typedef typename Iterator::reference reference;
-    typedef typename Iterator::difference_type difference_type;
 };
 
-template <class Iterator, bool> struct iterator_traits_helper {};
-
-template <class Iterator>
-struct iterator_traits_helper<Iterator, true>
-    : public iterator_traits_impl<
-          Iterator,
-          std::is_convertible<typename Iterator::iterator_category,
-                              input_iterator_tag>::value ||
-              std::is_convertible<typename Iterator::iterator_category,
-                                  output_iterator_tag>::value> {};
-
-template <class Iterator>
-struct iterator_traits
-    : public iterator_traits_helper<Iterator,
-                                    has_iterator_cat<Iterator>::value> {};
+template <typename Iterator>
+struct iterator_traits : public iterator_traits_helper<Iterator> {};
+// // 检查是否拥有 iterator_category 成员
+// template <class T> struct has_iterator_cat {
+//   private:
+//     struct two {
+//         char a;
+//         char b;
+//     };
+//     template <class U> static two test(...);
+//     template <class U> static char test(typename U::iterator_category * =
+//     0);
+//
+//   public:
+//     static const bool value = sizeof(test<T>(0)) == sizeof(char);
+// };
+//
+// template <class Iterator, bool> struct iterator_traits_impl {};
+//
+// template <class Iterator> struct iterator_traits_impl<Iterator, true> {
+//     typedef typename Iterator::iterator_category iterator_category;
+//     typedef typename Iterator::value_type value_type;
+//     typedef typename Iterator::pointer pointer;
+//     typedef typename Iterator::reference reference;
+//     typedef typename Iterator::difference_type difference_type;
+// };
+//
+// template <class Iterator, bool> struct iterator_traits_helper {};
+//
+// template <class Iterator>
+// struct iterator_traits_helper<Iterator, true>
+//     : public iterator_traits_impl<
+//           Iterator,
+//           std::is_convertible<typename Iterator::iterator_category,
+//                               input_iterator_tag>::value ||
+//               std::is_convertible<typename Iterator::iterator_category,
+//                                   output_iterator_tag>::value> {};
+//
+// template <class Iterator>
+// struct iterator_traits
+//     : public iterator_traits_helper<Iterator,
+//                                     has_iterator_cat<Iterator>::value> {};
 
 // 针对原生指针的偏特化版本
 template <class T> struct iterator_traits<T *> {
@@ -82,40 +100,6 @@ template <class T> struct iterator_traits<const T *> {
     typedef ptrdiff_t difference_type;
 };
 
-template <class T, class U, bool = has_iterator_cat<iterator_traits<T>>::value>
-struct has_iterator_cat_of
-    : public m_bool_constant<std::is_convertible<
-          typename iterator_traits<T>::iterator_category, U>::value> {};
-
-// 萃取某种迭代器
-template <class T, class U>
-struct has_iterator_cat_of<T, U, false> : public m_false_type {};
-
-template <class Iter>
-struct is_input_iterator
-    : public has_iterator_cat_of<Iter, input_iterator_tag> {};
-
-template <class Iter>
-struct is_output_iterator
-    : public has_iterator_cat_of<Iter, output_iterator_tag> {};
-
-template <class Iter>
-struct is_forward_iterator
-    : public has_iterator_cat_of<Iter, forward_iterator_tag> {};
-
-template <class Iter>
-struct is_bidirectional_iterator
-    : public has_iterator_cat_of<Iter, bidirectional_iterator_tag> {};
-
-template <class Iter>
-struct is_random_access_iterator
-    : public has_iterator_cat_of<Iter, random_access_iterator_tag> {};
-
-template <class Iterator>
-struct is_iterator
-    : public m_bool_constant<is_input_iterator<Iterator>::value ||
-                             is_output_iterator<Iterator>::value> {};
-
 // 萃取某个迭代器的 category
 template <class Iterator>
 typename iterator_traits<Iterator>::iterator_category
@@ -123,6 +107,54 @@ iterator_category(const Iterator &) {
     typedef typename iterator_traits<Iterator>::iterator_category Category;
     return Category();
 }
+
+template <typename Iter>
+using iter_category_t = typename iterator_traits<Iter>::iterator_category;
+
+template <typename InIter>
+using RequireInputIter = typename std::enable_if<std::is_convertible<
+    easystl::iter_category_t<InIter>, input_iterator_tag>::value>::type;
+
+template <typename Iter, typename Cat = iter_category_t<Iter>>
+struct is_random_access_iter
+    : std::is_base_of<random_access_iterator_tag, Cat> {
+    typedef std::is_base_of<random_access_iterator_tag, Cat> Base;
+    enum { value = Base::value };
+};
+
+// template <class T, class U, bool =
+// has_iterator_cat<iterator_traits<T>>::value> struct has_iterator_cat_of
+//     : public m_bool_constant<std::is_convertible<
+//           typename iterator_traits<T>::iterator_category, U>::value> {};
+
+// 萃取某种迭代器
+// template <class T, class U>
+// struct has_iterator_cat_of<T, U, false> : public m_false_type {};
+//
+// template <class Iter>
+// struct is_input_iterator
+//     : public has_iterator_cat_of<Iter, input_iterator_tag> {};
+//
+// template <class Iter>
+// struct is_output_iterator
+//     : public has_iterator_cat_of<Iter, output_iterator_tag> {};
+//
+// template <class Iter>
+// struct is_forward_iterator
+//     : public has_iterator_cat_of<Iter, forward_iterator_tag> {};
+//
+// template <class Iter>
+// struct is_bidirectional_iterator
+//     : public has_iterator_cat_of<Iter, bidirectional_iterator_tag> {};
+//
+// template <class Iter>
+// struct is_random_access_iterator
+//     : public has_iterator_cat_of<Iter, random_access_iterator_tag> {};
+
+// template <class Iterator>
+// struct is_iterator
+//     : public m_bool_constant<is_input_iterator<Iterator>::value ||
+//                              is_output_iterator<Iterator>::value> {};
 
 // 萃取某个迭代器的 distance_type
 template <class Iterator>
@@ -142,7 +174,7 @@ typename iterator_traits<Iterator>::value_type *value_type(const Iterator &) {
 
 // distance 的 input_iterator_tag 的版本
 template <class InputIterator>
-typename iterator_traits<InputIterator>::difference_type
+inline typename iterator_traits<InputIterator>::difference_type
 distance_dispatch(InputIterator first, InputIterator last, input_iterator_tag) {
     typename iterator_traits<InputIterator>::difference_type n = 0;
     while (first != last) {
@@ -171,6 +203,7 @@ distance(InputIterator first, InputIterator last) {
 // advance 的 input_iterator_tag 的版本
 template <class InputIterator, class Distance>
 void advance_dispatch(InputIterator &i, Distance n, input_iterator_tag) {
+    EASYSTL_DEBUG(n >= 0);
     while (n--)
         ++i;
 }
@@ -179,7 +212,7 @@ void advance_dispatch(InputIterator &i, Distance n, input_iterator_tag) {
 template <class BidirectionalIterator, class Distance>
 void advance_dispatch(BidirectionalIterator &i, Distance n,
                       bidirectional_iterator_tag) {
-    if (n >= 0)
+    if (n > 0)
         while (n--)
             ++i;
     else
@@ -195,7 +228,24 @@ void advance_dispatch(RandomIter &i, Distance n, random_access_iterator_tag) {
 
 template <class InputIterator, class Distance>
 void advance(InputIterator &i, Distance n) {
-    advance_dispatch(i, n, iterator_category(i));
+    typename iterator_traits<InputIterator>::difference_type d = n;
+    advance_dispatch(i, d, iterator_category(i));
+}
+
+template <typename InputIterator>
+inline InputIterator
+next(InputIterator x,
+     typename iterator_traits<InputIterator>::difference_type n = 1) {
+    easystl::advance(x, n);
+    return x;
+}
+
+template <typename BidirectionIterator>
+inline BidirectionIterator
+prev(BidirectionIterator x,
+     typename iterator_traits<BidirectionIterator>::difference_type n = 1) {
+    easystl::advance(x, -n);
+    return x;
 }
 
 // 模板类 : reverse_iterator
@@ -203,78 +253,107 @@ void advance(InputIterator &i, Distance n) {
 template <class Iterator> class reverse_iterator {
   private:
     Iterator current; // 记录对应的正向迭代器
+    typedef iterator_traits<Iterator> traits_type;
 
   public:
-    // 反向迭代器的五种相应型别
-    typedef
-        typename iterator_traits<Iterator>::iterator_category iterator_category;
-    typedef typename iterator_traits<Iterator>::value_type value_type;
-    typedef typename iterator_traits<Iterator>::difference_type difference_type;
-    typedef typename iterator_traits<Iterator>::pointer pointer;
-    typedef typename iterator_traits<Iterator>::reference reference;
-
     typedef Iterator iterator_type;
-    typedef reverse_iterator<Iterator> self;
+    typedef typename iterator_traits<Iterator>::pointer pointer;
+    typedef typename iterator_traits<Iterator>::difference_type difference_type;
+    typedef typename iterator_traits<Iterator>::reference reference;
+    // typedef
+    //     typename iterator_traits<Iterator>::iterator_category
+    //     iterator_category;
+    // typedef typename iterator_traits<Iterator>::value_type value_type;
+    //
+    // typedef reverse_iterator<Iterator> self;
 
   public:
     // 构造函数
-    reverse_iterator() {}
-    explicit reverse_iterator(iterator_type i) : current(i) {}
-    reverse_iterator(const self &rhs) : current(rhs.current) {}
+    reverse_iterator() noexcept(noexcept(Iterator())) : current() {}
+
+    explicit reverse_iterator(iterator_type i) noexcept(noexcept(Iterator()))
+        : current(i) {}
+
+    reverse_iterator(const reverse_iterator &x) noexcept(
+        noexcept(Iterator(x.current)))
+        : current(x.current) {}
+
+    reverse_iterator &operator=(const reverse_iterator &) = default;
+
+    template <typename Iter>
+    reverse_iterator(const reverse_iterator<Iter> &x) noexcept(
+        noexcept(Iterator(x.current)))
+        : current(x.current) {}
+
+    template <typename Iter>
+    reverse_iterator &operator=(const reverse_iterator<Iter> &x) noexcept(
+        noexcept(current = x.current)) {
+        current = x.current;
+        return *this;
+    }
 
   public:
     // 取出对应的正向迭代器
-    iterator_type base() const { return current; }
+    iterator_type base() const noexcept(noexcept(Iterator(current))) {
+        return current;
+    }
 
     // 重载操作符
     reference operator*() const { // 实际对应正向迭代器的前一个位置
         auto tmp = current;
         return *--tmp;
     }
-    pointer operator->() const { return &(operator*()); }
+    pointer operator->() const {
+        auto tmp = current;
+        --tmp;
+        return S_to_pointer(tmp);
+    }
 
     // 前进(++)变为后退(--)
-    self &operator++() {
+    reverse_iterator &operator++() {
         --current;
         return *this;
     }
-    self operator++(int) {
-        self tmp = *this;
+    reverse_iterator operator++(int) {
+        auto tmp = *this;
         --current;
         return tmp;
     }
     // 后退(--)变为前进(++)
-    self &operator--() {
+    reverse_iterator &operator--() {
         ++current;
         return *this;
     }
-    self operator--(int) {
-        self tmp = *this;
+    reverse_iterator operator--(int) {
+        auto tmp = *this;
         ++current;
         return tmp;
     }
 
-    self &operator+=(difference_type n) {
+    reverse_iterator &operator+=(difference_type n) {
         current -= n;
         return *this;
     }
-    self operator+(difference_type n) const { return self(current - n); }
-    self &operator-=(difference_type n) {
+    reverse_iterator operator+(difference_type n) const {
+        return reverse_iterator(current - n);
+    }
+    reverse_iterator &operator-=(difference_type n) {
         current += n;
         return *this;
     }
-    self operator-(difference_type n) const { return self(current + n); }
+    reverse_iterator operator-(difference_type n) const {
+        return reverse_iterator(current + n);
+    }
 
     reference operator[](difference_type n) const { return *(*this + n); }
-};
 
-// 重载 operator-
-template <class Iterator>
-typename reverse_iterator<Iterator>::difference_type
-operator-(const reverse_iterator<Iterator> &lhs,
-          const reverse_iterator<Iterator> &rhs) {
-    return rhs.base() - lhs.base();
-}
+  private:
+    template <typename Tp> static Tp *S_to_pointer(Tp *p) { return p; }
+
+    template <typename Tp> static pointer S_to_pointer(Tp t) {
+        return t.operator->();
+    }
+};
 
 // 重载比较操作符
 template <class Iterator>
@@ -312,6 +391,61 @@ bool operator>=(const reverse_iterator<Iterator> &lhs,
                 const reverse_iterator<Iterator> &rhs) {
     return !(lhs < rhs);
 }
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator==(const reverse_iterator<IteratorL> &lhs,
+                       const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() == rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator<(const reverse_iterator<IteratorL> &lhs,
+                      const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() > rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator!=(const reverse_iterator<IteratorL> &lhs,
+                       const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() != rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator>(const reverse_iterator<IteratorL> &lhs,
+                      const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() < rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator<=(const reverse_iterator<IteratorL> &lhs,
+                       const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() >= rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline bool operator>=(const reverse_iterator<IteratorL> &lhs,
+                       const reverse_iterator<IteratorR> &rhs) {
+    return lhs.base() <= rhs.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+inline auto operator-(const reverse_iterator<IteratorL> &lhs,
+                      const reverse_iterator<IteratorR> &rhs)
+    -> decltype(rhs.base() - lhs.base()) {
+    return rhs.base() - lhs.base();
+}
+
+template <typename Iterator>
+inline reverse_iterator<Iterator>
+operator+(typename reverse_iterator<Iterator>::difference_type n,
+          const reverse_iterator<Iterator> &x) {
+    return reverse_iterator<Iterator>(x.base() - n);
+}
+
+// template <typename Iterator>
+// inline reverse_iterator<Iterator> make_reverse_iterator(Iterator i) {
+//     return reverse_iterator<Iterator>(i);
+// }
 
 } // namespace easystl
 namespace easystl_cxx {
