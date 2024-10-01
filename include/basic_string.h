@@ -162,7 +162,7 @@ struct basic_string {
     /**
      *  @brief  释放已分配的内存
      */
-    void M_destroy(size_type size) throw() {
+    void M_destroy(size_type size) noexcept {
         alloc_traits::deallocate(M_get_allocator(), M_data(), size + 1);
     }
 
