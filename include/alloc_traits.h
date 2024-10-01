@@ -375,16 +375,16 @@ template <> struct allocator_traits<allocator<void>> {
     }
 };
 
-} // namespace easystl
-
-namespace easystl {
-
 template <typename T> T *to_address(T *p) noexcept { return p; }
 
 template <typename Ptr>
 auto to_address(const Ptr &p) noexcept -> decltype(p.operator->()) {
     return p.operator->();
 }
+
+} // namespace easystl
+
+namespace easystl_cxx {
 
 template <typename Alloc, typename = typename Alloc::value_type>
 struct alloc_traits : easystl::allocator_traits<Alloc> {
@@ -407,8 +407,9 @@ struct alloc_traits : easystl::allocator_traits<Alloc> {
 
   private:
     template <typename Ptr>
-    using is_custom_pointer = m_bool_constant<std::is_same<pointer, Ptr>() &&
-                                              !std::is_pointer<Ptr>()>;
+    using is_custom_pointer =
+        easystl::m_bool_constant<std::is_same<pointer, Ptr>() &&
+                                 !std::is_pointer<Ptr>()>;
 
   public:
     // overload construct for non-standard pointer types
@@ -460,6 +461,6 @@ struct alloc_traits : easystl::allocator_traits<Alloc> {
     };
 };
 
-} // namespace easystl
+} // namespace easystl_cxx
 
 #endif // !EASYSTL_ALLOC_TRAITS_H

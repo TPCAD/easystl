@@ -21,7 +21,7 @@ struct basic_string {
                   "CharType must be same as Allocator::value_type");
     using char_alloc_type = Allocator;
 
-    typedef easystl::alloc_traits<char_alloc_type> alloc_traits;
+    typedef easystl_cxx::alloc_traits<char_alloc_type> alloc_traits;
 
   public:
     typedef CharTraits traits_type;
@@ -1852,7 +1852,7 @@ str_concat(typename Str::value_type const *lhs, typename Str::size_type lhs_len,
            typename Str::value_type const *rhs, typename Str::size_type rhs_len,
            typename Str::allocator_type const &a) {
     typedef typename Str::allocator_type allocator_type;
-    typedef easystl::alloc_traits<allocator_type> alloc_traits;
+    typedef easystl_cxx::alloc_traits<allocator_type> alloc_traits;
 
     Str str(alloc_traits::S_select_on_copy(a));
     str.reserve(lhs_len + rhs_len);
