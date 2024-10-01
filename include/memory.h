@@ -1,7 +1,7 @@
 #ifndef EASYSTL_MEMORY_H
 #define EASYSTL_MEMORY_H
 
-#include "uninitialized.h"
+// #include "uninitialized.h"
 
 namespace easystl {
 

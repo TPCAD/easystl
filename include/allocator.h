@@ -1,98 +1,187 @@
 #ifndef EASYSTL_ALLOCATOR_H
 #define EASYSTL_ALLOCATOR_H
 
-#include "construct.h"
+#include "utility.h"
+#include <cstddef>
+#include <memory.h>
+#include <stdexcept>
+#include <type_traits>
+
+namespace easystl {
+template <typename Tp> class allocator_base {
+
+  public:
+    typedef Tp value_type;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
+
+    typedef Tp *pointer;
+    typedef const Tp *const_pointer;
+    typedef Tp &reference;
+    typedef const Tp &const_reference;
+
+    template <typename Tp1> struct rebind {
+        typedef allocator_base<Tp1> other;
+    };
+
+    typedef std::true_type propagate_on_container_move_assignment;
+
+    inline allocator_base() noexcept {}
+    inline allocator_base(const allocator_base &) noexcept {}
+    template <typename Tp1>
+    allocator_base(const allocator_base<Tp1> &) noexcept {}
+    allocator_base &operator=(const allocator_base &) = default;
+    ~allocator_base() noexcept {}
+
+    pointer address(reference x) const noexcept { return std::__addressof(x); }
+    const_pointer address(const_reference x) const noexcept {
+        return std::__addressof(x);
+    }
+
+    Tp *allocate(size_type n, const void * = static_cast<const void *>(0)) {
+        static_assert(sizeof(Tp) != 0, "cannot allocate incomplete types");
+
+        if (n > this->M_max_size()) {
+            if (n > (std::size_t(-1) / sizeof(Tp))) {
+                std::__throw_bad_array_new_length();
+            }
+            std::__throw_bad_alloc();
+        }
+
+        return static_cast<Tp *>(::operator new(n * sizeof(Tp)));
+    }
+
+    void deallocate(Tp *p, size_type) {
+        if (p == nullptr) {
+            return;
+        }
+        ::operator delete(p);
+    }
+
+    inline size_type max_size() const noexcept { return M_max_size(); }
+
+    template <class Up, class... Args>
+    void construct(Up *p, Args &&...args) noexcept(
+        std::is_nothrow_constructible<Up, Args...>::value) {
+        ::new ((void *)p) Up(easystl::forward<Args>(args)...);
+    }
+
+    template <typename Up>
+    inline void
+    destroy(Up *p) noexcept(std::is_nothrow_destructible<Up>::value) {
+        p->~Up();
+    }
+
+    template <typename Up>
+    friend inline bool operator==(const allocator_base &,
+                                  const allocator_base<Up> &) noexcept {
+        return true;
+    }
+    template <typename Up>
+    friend inline bool operator!=(const allocator_base &,
+                                  const allocator_base<Up> &) noexcept {
+        return false;
+    }
+
+  private:
+    size_type M_max_size() const noexcept {
+#if __PTRDIFF_MAX__ < __SIZE_MAX__
+        return std::size_t(__PTRDIFF_MAX__) / sizeof(Tp);
+#else
+        return std::size_t(-1) / sizeof(_Tp);
+#endif
+    }
+};
+} // namespace easystl
 
 namespace easystl {
 
-template <class T> class allocator {
+template <class Tp> class allocator : public allocator_base<Tp> {
   public:
-    typedef T value_type;
-    typedef T *pointer;
-    typedef const T *const_pointer;
-    typedef T &reference;
-    typedef const T &const_reference;
+    typedef Tp value_type;
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
 
+    typedef Tp *pointer;
+    typedef const Tp *const_pointer;
+    typedef Tp &reference;
+    typedef const Tp &const_reference;
+
+    template <typename Tp1> struct rebind {
+        typedef allocator<Tp1> other;
+    };
+
+    using propagate_on_container_move_assignment = std::true_type;
+
+    using is_always_equal _GLIBCXX20_DEPRECATED_SUGGEST(
+        "std::allocator_traits::is_always_equal") = std::true_type;
+
   public:
-    allocator() noexcept {}
-    allocator(const allocator &) noexcept {}
-    template <typename T1> allocator(const allocator<T1> &) noexcept {}
-    ~allocator() noexcept {}
+    inline allocator() noexcept {}
+    allocator(const allocator &a) noexcept : allocator_base<Tp>(a) {}
 
-    static T *allocate();
-    static T *allocate(size_type n);
+    allocator &operator=(const allocator &) = default;
 
-    static void deallocate(T *ptr);
-    static void deallocate(T *ptr, size_type n);
+    template <typename Tp1> allocator(const allocator<Tp1> &) noexcept {}
+    inline ~allocator() noexcept {}
 
-    static void construct(T *ptr);
-    static void construct(T *ptr, const T &value);
-    static void construct(T *ptr, T &&value);
-
-    template <class... Args> static void construct(T *ptr, Args &&...args);
-
-    static void destroy(T *ptr);
-    static void destroy(T *first, T *last);
+    friend inline bool operator==(const allocator &,
+                                  const allocator &) noexcept {
+        return true;
+    }
+    friend inline bool operator!=(const allocator &,
+                                  const allocator &) noexcept {
+        return false;
+    }
 };
 
-template <class T> T *allocator<T>::allocate() {
-    return static_cast<T *>(::operator new(sizeof(T)));
+template <typename T1, typename T2>
+inline bool operator==(const allocator<T1> &, const allocator<T2> &) noexcept {
+    return true;
 }
-
-template <class T> T *allocator<T>::allocate(size_type n) {
-    if (n == 0) {
-        return nullptr;
-    }
-    return static_cast<T *>(::operator new(n * sizeof(T)));
-}
-
-template <class T> void allocator<T>::deallocate(T *ptr) {
-    if (ptr == nullptr) {
-        return;
-    }
-    ::operator delete(ptr);
-}
-
-template <class T> void allocator<T>::deallocate(T *ptr, size_type) {
-    if (ptr == nullptr) {
-        return;
-    }
-    ::operator delete(ptr);
-}
-
-template <class T> void allocator<T>::construct(T *ptr, const T &value) {
-    easystl::construct(ptr, value);
-}
-
-template <class T> void allocator<T>::construct(T *ptr, T &&value) {
-    easystl::construct(ptr, move(value));
-}
-
-template <class T>
-template <class... Args>
-void allocator<T>::construct(T *ptr, Args &&...args) {
-    easystl::construct(ptr, forward<Args>(args)...);
-}
-
-template <class T> void allocator<T>::destroy(T *ptr) { easystl::destroy(ptr); }
-
-template <class T> void allocator<T>::destroy(T *first, T *last) {
-    easystl::destroy(first, last);
-}
-
-// FIX: strange
 template <typename T1, typename T2>
 inline bool operator!=(const allocator<T1> &, const allocator<T2> &) noexcept {
     return false;
 }
 
-// FIX: strange
-template <typename T1, typename T2>
-inline bool operator==(const allocator<T1> &, const allocator<T2> &) noexcept {
-    return true;
-}
+template <typename Tp> class allocator<const Tp> {
+  public:
+    typedef Tp value_type;
+    allocator() {}
+    template <typename Up> allocator(const allocator<Up> &) {}
+};
+
+template <typename Tp> class allocator<volatile Tp> {
+  public:
+    typedef Tp value_type;
+    allocator() {}
+    template <typename Up> allocator(const allocator<Up> &) {}
+};
+
+template <typename Tp> class allocator<const volatile Tp> {
+  public:
+    typedef Tp value_type;
+    allocator() {}
+    template <typename Up> allocator(const allocator<Up> &) {}
+};
+
+template <> class allocator<void> {
+  public:
+    typedef void value_type;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+
+    typedef void *pointer;
+    typedef const void *const_pointer;
+
+    template <typename Tp1> struct rebind {
+        typedef allocator<Tp1> other;
+    };
+
+    using propagate_on_container_move_assignment = std::true_type;
+
+    using is_always_equal = std::true_type;
+};
 
 } // namespace easystl
 

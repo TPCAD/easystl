@@ -1,8 +1,11 @@
 #ifndef EASYSTL_BASIC_STRING_H
 #define EASYSTL_BASIC_STRING_H
 
-#include "allocator.h"
+#include "algobase.h"
+#include "alloc_traits.h"
 #include "char_traits.h"
+#include "iterator.h"
+#include "utility.h"
 #include <limits>
 
 namespace easystl {
