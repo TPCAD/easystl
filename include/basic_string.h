@@ -277,7 +277,7 @@ struct basic_string {
      */
     static void S_copy_chars(CharType *p, iterator first,
                              iterator end) noexcept {
-        S_copy_chars(p, first, end);
+        S_copy_chars(p, first.base(), end.base());
     }
 
     /**
@@ -288,7 +288,7 @@ struct basic_string {
      */
     static void S_copy_chars(CharType *p, const_iterator first,
                              const_iterator end) noexcept {
-        S_copy_chars(p, first, end);
+        S_copy_chars(p, first.base(), end.base());
     }
 
     /**
