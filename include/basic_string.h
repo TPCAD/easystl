@@ -2421,6 +2421,16 @@ void basic_string<CharType, CharTraits, Allocator>::M_erase(size_type pos,
 }
 
 template <typename CharType, typename CharTraits, typename Allocator>
+void basic_string<CharType, CharTraits, Allocator>::resize(size_type n,
+                                                           CharType c) {
+    const size_type size = this->size();
+    if (size < n)
+        this->append(n - size, c);
+    else if (n < size)
+        this->M_set_length(n);
+}
+
+template <typename CharType, typename CharTraits, typename Allocator>
 void basic_string<CharType, CharTraits, Allocator>::reserve(size_type res) {
     const size_type current_capacity = capacity();
     // _GLIBCXX_RESOLVE_LIB_DEFECTS
