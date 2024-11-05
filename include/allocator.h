@@ -10,20 +10,20 @@ namespace easystl {
 template <typename Tp> class allocator_base {
 
   public:
-    typedef Tp value_type;
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
+    using value_type = Tp;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
-    typedef Tp *pointer;
-    typedef const Tp *const_pointer;
-    typedef Tp &reference;
-    typedef const Tp &const_reference;
+    using pointer = Tp *;
+    using const_pointer = const Tp *;
+    using reference = Tp &;
+    using const_reference = const Tp &;
 
     template <typename Tp1> struct rebind {
         typedef allocator_base<Tp1> other;
     };
 
-    typedef std::true_type propagate_on_container_move_assignment;
+    using propagate_on_container_move_assignment = std::true_type;
 
     inline allocator_base() noexcept {}
     inline allocator_base(const allocator_base &) noexcept {}
@@ -97,14 +97,14 @@ namespace easystl {
 
 template <class Tp> class allocator : public allocator_base<Tp> {
   public:
-    typedef Tp value_type;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
+    using value_type = Tp;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
-    typedef Tp *pointer;
-    typedef const Tp *const_pointer;
-    typedef Tp &reference;
-    typedef const Tp &const_reference;
+    using pointer = Tp *;
+    using const_pointer = const Tp *;
+    using reference = Tp &;
+    using const_reference = const Tp &;
 
     template <typename Tp1> struct rebind {
         typedef allocator<Tp1> other;
@@ -144,33 +144,33 @@ inline bool operator!=(const allocator<T1> &, const allocator<T2> &) noexcept {
 
 template <typename Tp> class allocator<const Tp> {
   public:
-    typedef Tp value_type;
+    using value_type = Tp;
     allocator() {}
     template <typename Up> allocator(const allocator<Up> &) {}
 };
 
 template <typename Tp> class allocator<volatile Tp> {
   public:
-    typedef Tp value_type;
+    using value_type = Tp;
     allocator() {}
     template <typename Up> allocator(const allocator<Up> &) {}
 };
 
 template <typename Tp> class allocator<const volatile Tp> {
   public:
-    typedef Tp value_type;
+    using value_type = Tp;
     allocator() {}
     template <typename Up> allocator(const allocator<Up> &) {}
 };
 
 template <> class allocator<void> {
   public:
-    typedef void value_type;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
+    using value_type = void;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
-    typedef void *pointer;
-    typedef const void *const_pointer;
+    using pointer = void *;
+    using const_pointer = const void *;
 
     template <typename Tp1> struct rebind {
         typedef allocator<Tp1> other;
