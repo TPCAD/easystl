@@ -107,7 +107,7 @@ template <class Tp> class allocator : public allocator_base<Tp> {
     using const_reference = const Tp &;
 
     template <typename Tp1> struct rebind {
-        typedef allocator<Tp1> other;
+        using other = allocator<Tp1>;
     };
 
     using propagate_on_container_move_assignment = std::true_type;
