@@ -3,6 +3,7 @@
 
 #include "utility.h"
 #include <cstddef>
+#include <cstdint>
 #include <memory.h>
 #include <stdexcept>
 #include <type_traits>
@@ -85,10 +86,10 @@ template <typename Tp> class allocator_base {
 
   private:
     size_type M_max_size() const noexcept {
-#if __PTRDIFF_MAX__ < __SIZE_MAX__
-        return std::size_t(__PTRDIFF_MAX__) / sizeof(Tp);
+#if PTRDIFF_MAX < SIZE_MAX
+        return std::size_t(PTRDIFF_MAX) / sizeof(Tp);
 #else
-        return std::size_t(-1) / sizeof(_Tp);
+        return std::size_t(-1) / sizeof(Tp);
 #endif
     }
 };
@@ -113,8 +114,7 @@ template <class Tp> class allocator : public allocator_base<Tp> {
 
     using propagate_on_container_move_assignment = std::true_type;
 
-    using is_always_equal _GLIBCXX20_DEPRECATED_SUGGEST(
-        "std::allocator_traits::is_always_equal") = std::true_type;
+    using is_always_equal = std::true_type;
 
   public:
     inline allocator() noexcept {}
