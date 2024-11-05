@@ -1,8 +1,8 @@
 #ifndef EASYSTL_ITERATOR_H
 #define EASYSTL_ITERATOR_H
 
-#include "alloc_traits.h"
 #include "exceptdef.h"
+#include "memory/alloc_traits.h"
 
 namespace easystl {
 

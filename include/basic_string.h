@@ -2,9 +2,9 @@
 #define EASYSTL_BASIC_STRING_H
 
 #include "algobase.h"
-#include "alloc_traits.h"
 #include "char_traits.h"
 #include "iterator.h"
+#include "memory/alloc_traits.h"
 #include "utility.h"
 #include <limits>
 
@@ -501,7 +501,7 @@ struct basic_string {
      */
     basic_string(basic_string &str, const Allocator &a)
         : M_dataplus(M_local_data(), a) {
-        M_construct(str.being(), str.end(), easystl::forward_iterator_tag());
+        M_construct(str.begin(), str.end(), easystl::forward_iterator_tag());
     }
 
     /**
@@ -708,7 +708,7 @@ struct basic_string {
      *  character in the %string.
      */
     const_iterator cbegin() const noexcept {
-        return const_iterator(this->_M_data());
+        return const_iterator(this->M_data());
     }
 
     /**
@@ -716,7 +716,7 @@ struct basic_string {
      *  last character in the %string.
      */
     const_iterator cend() const noexcept {
-        return const_iterator(this->_M_data() + this->size());
+        return const_iterator(this->M_data() + this->size());
     }
 
     /**

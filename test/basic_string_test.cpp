@@ -5,7 +5,6 @@
 #include <climits>
 #include <cstring>
 #include <initializer_list>
-#include <list>
 #include <string>
 
 // 1. basic_string()
