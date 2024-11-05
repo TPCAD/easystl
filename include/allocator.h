@@ -4,9 +4,7 @@
 #include "utility.h"
 #include <cstddef>
 #include <cstdint>
-#include <memory.h>
 #include <stdexcept>
-#include <type_traits>
 
 namespace easystl {
 template <typename Tp> class allocator_base {
