@@ -6,7 +6,21 @@
 #include "utility.h"
 
 namespace easystl {
+
+/**
+ *  @brief  base class of allocator_traits
+ *  @param  Tp  allocator
+ *  @param  Up  rebind type
+ */
 struct allocator_traits_base {
+    /**
+     *  匹配不含 rebind 的 allocator
+     *  利用 std::__replace_first_arg 生成不同类型的 allcator
+     *  std::__replace_first_arg<std::allocator<int>, double> 相当于
+     *  std::allocator<double>
+     *
+     *  因此，rebind<Tp, Up> 相当于 allocator<Up>
+     */
     template <typename Tp, typename Up, typename = void>
     struct rebind : std::__replace_first_arg<Tp, Up> {
         static_assert(
@@ -16,9 +30,10 @@ struct allocator_traits_base {
             "allocator_traits<A>::rebind_alloc<A::value_type> must be A");
     };
 
+    // 匹配含有 rebind 的 allcator
     template <typename Tp, typename Up>
     struct rebind<Tp, Up,
-                  std::__void_t<typename Tp::template rebind<Up>::other>> {
+                  easystl::void_t<typename Tp::template rebind<Up>::other>> {
         using type = typename Tp::template rebind<Up>::other;
 
         static_assert(
@@ -114,8 +129,8 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
   private:
     template <typename Alloc2>
     static constexpr auto S_allocate(Alloc2 &a, size_type n,
-                                     const_void_pointer hint,
-                                     int) -> decltype(a.allocate(n, hint)) {
+                                     const_void_pointer hint, int)
+        -> decltype(a.allocate(n, hint)) {
         return a.allocate(n, hint);
     }
 
@@ -157,9 +172,9 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     }
 
     template <typename Alloc2, typename Tp>
-    static auto
-    S_destroy(Alloc2 &a, Tp *p,
-              int) noexcept(noexcept(a.destroy(p))) -> decltype(a.destroy(p)) {
+    static auto S_destroy(Alloc2 &a, Tp *p,
+                          int) noexcept(noexcept(a.destroy(p)))
+        -> decltype(a.destroy(p)) {
         a.destroy(p);
     }
 
