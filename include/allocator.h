@@ -33,9 +33,9 @@ template <typename Tp> class allocator_base {
     allocator_base &operator=(const allocator_base &) = default;
     ~allocator_base() noexcept {}
 
-    pointer address(reference x) const noexcept { return std::__addressof(x); }
+    pointer address(reference x) const noexcept { return std::addressof(x); }
     const_pointer address(const_reference x) const noexcept {
-        return std::__addressof(x);
+        return std::addressof(x);
     }
 
     Tp *allocate(size_type n, const void * = static_cast<const void *>(0)) {
