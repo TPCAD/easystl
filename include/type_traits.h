@@ -5,6 +5,8 @@
 
 namespace easystl {
 
+template <class...> using void_t = void;
+
 template <class T, T v> struct m_integral_constant {
     static constexpr T value = v;
 };
