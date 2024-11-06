@@ -1,7 +1,12 @@
 #ifndef EASYSTL_ALLOCATOR_H
 #define EASYSTL_ALLOCATOR_H
 
+#ifndef HEADER_STYLE
 #include "utility.h"
+#else
+#include "../utility.h"
+#endif // !HEADER_STYLE
+
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>

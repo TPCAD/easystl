@@ -1,8 +1,13 @@
 #ifndef EASYSTL_ALLOC_TRAITS_H
 #define EASYSTL_ALLOC_TRAITS_H
 
+#ifndef HEADER_STYLE
+#include "type_traits.h"
+#include "utility.h"
+#else
 #include "../type_traits.h"
 #include "../utility.h"
+#endif // HEADER_STYLE
 
 #include "allocator.h"
 
