@@ -1,9 +1,10 @@
 #ifndef EASYSTL_ALLOC_TRAITS_H
 #define EASYSTL_ALLOC_TRAITS_H
 
+#include "../type_traits.h"
+#include "../utility.h"
+
 #include "allocator.h"
-#include "type_traits.h"
-#include "utility.h"
 
 namespace easystl {
 
@@ -44,20 +45,22 @@ struct allocator_traits_base {
     };
 
   protected:
-    template <typename Tp> using __pointer = typename Tp::pointer;
-    template <typename Tp> using __c_pointer = typename Tp::const_pointer;
-    template <typename Tp> using __v_pointer = typename Tp::void_pointer;
-    template <typename Tp> using __cv_pointer = typename Tp::const_void_pointer;
+    template <typename Tp> using pointer = typename Tp::pointer;
+    template <typename Tp> using c_pointer = typename Tp::const_pointer;
+    template <typename Tp> using v_pointer = typename Tp::void_pointer;
+    template <typename Tp> using cv_pointer = typename Tp::const_void_pointer;
     template <typename Tp>
-    using __pocca = typename Tp::propagate_on_container_copy_assignment;
+    using pocca = typename Tp::propagate_on_container_copy_assignment;
     template <typename Tp>
-    using __pocma = typename Tp::propagate_on_container_move_assignment;
+    using pocma = typename Tp::propagate_on_container_move_assignment;
     template <typename Tp>
-    using __pocs = typename Tp::propagate_on_container_swap;
+    using pocs = typename Tp::propagate_on_container_swap;
+
     template <typename Tp>
-    using __equal = std::__type_identity<typename Tp::is_always_equal>;
+    using equal = std::__type_identity<typename Tp::is_always_equal>;
 };
 
+// template alias
 template <typename Alloc, typename Up>
 using alloc_rebind =
     typename allocator_traits_base::template rebind<Alloc, Up>::type;
@@ -69,7 +72,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     typedef typename Alloc::value_type value_type;
 
     // 指针类型
-    using pointer = std::__detected_or_t<value_type *, __pointer, Alloc>;
+    using pointer = std::__detected_or_t<value_type *, pointer, Alloc>;
 
   private:
     template <template <typename> class Func, typename Tp, typename = void>
@@ -100,27 +103,27 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     };
 
   public:
-    using const_pointer = typename Ptr<__c_pointer, const value_type>::type;
+    using const_pointer = typename Ptr<c_pointer, const value_type>::type;
 
-    using void_pointer = typename Ptr<__v_pointer, void>::type;
+    using void_pointer = typename Ptr<v_pointer, void>::type;
 
-    using const_void_pointer = typename Ptr<__cv_pointer, const void>::type;
+    using const_void_pointer = typename Ptr<cv_pointer, const void>::type;
 
     using difference_type = typename Diff<Alloc, pointer>::type;
 
     using size_type = typename Size<Alloc, difference_type>::type;
 
     using propagate_on_container_copy_assignment =
-        std::__detected_or_t<std::false_type, __pocca, Alloc>;
+        std::__detected_or_t<std::false_type, pocca, Alloc>;
 
     using propagate_on_container_move_assignment =
-        std::__detected_or_t<std::false_type, __pocma, Alloc>;
+        std::__detected_or_t<std::false_type, pocma, Alloc>;
 
     using propagate_on_container_swap =
-        std::__detected_or_t<std::false_type, __pocs, Alloc>;
+        std::__detected_or_t<std::false_type, pocs, Alloc>;
 
-    using is_always_equal = typename std::__detected_or_t<std::is_empty<Alloc>,
-                                                          __equal, Alloc>::type;
+    using is_always_equal =
+        typename std::__detected_or_t<std::is_empty<Alloc>, equal, Alloc>::type;
 
     template <typename Tp> using rebind_alloc = alloc_rebind<Alloc, Tp>;
     template <typename Tp>
