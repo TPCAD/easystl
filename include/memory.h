@@ -1,8 +1,8 @@
 #ifndef EASYSTL_MEMORY_H
 #define EASYSTL_MEMORY_H
 
-#include <memory/alloc_traits.h>
-#include <memory/allocator.h>
+#include "memory/alloc_traits.h"
+#include "memory/allocator.h"
 // #include "uninitialized.h"
 
 namespace easystl {

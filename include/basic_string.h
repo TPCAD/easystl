@@ -4,7 +4,7 @@
 #include "algobase.h"
 #include "char_traits.h"
 #include "iterator.h"
-#include "memory/alloc_traits.h"
+#include "memory"
 #include "utility.h"
 #include <limits>
 
