@@ -61,6 +61,8 @@ struct allocator_traits_base {
     template <typename Tp>
     using pocs = typename Tp::propagate_on_container_swap;
 
+    // std::__type_identity<typename Tp::is_always_equal> equals to
+    // Tp::is_always_equal
     template <typename Tp>
     using equal = std::__type_identity<typename Tp::is_always_equal>;
 };
@@ -77,6 +79,8 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     typedef typename Alloc::value_type value_type;
 
     // 指针类型
+    // 如果有 Alloc::pointer 则 pointer 为 Alloc::pointer
+    // 若没有则为 value_type*
     using pointer = std::__detected_or_t<value_type *, pointer, Alloc>;
 
   private:
@@ -85,6 +89,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
         using type = typename std::pointer_traits<pointer>::template rebind<Tp>;
     };
 
+    // 偏特化，分配器存在别名 const_pointer
     template <template <typename> class Func, typename Tp>
     struct Ptr<Func, Tp, std::__void_t<Func<Alloc>>> {
         using type = Func<Alloc>;
@@ -108,6 +113,10 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     };
 
   public:
+    // Func<Alloc> 替换为
+    // template <typename Tp> using c_pointer = typename Tp::const_pointer;
+    // 其中 Tp = Alloc，也就是 allocator
+    // 最终 Func<Alloc> 就是 allocator::const_pointer
     using const_pointer = typename Ptr<c_pointer, const value_type>::type;
 
     using void_pointer = typename Ptr<v_pointer, void>::type;
@@ -127,6 +136,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     using propagate_on_container_swap =
         std::__detected_or_t<std::false_type, pocs, Alloc>;
 
+    // std::is_empty 判断分配器是否是无状态分配器（没有非静态数据成员等）
     using is_always_equal =
         typename std::__detected_or_t<std::is_empty<Alloc>, equal, Alloc>::type;
 
@@ -155,7 +165,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
                       std::declval<Tp *>(), std::declval<Args>()...))>
         static std::true_type test(int);
 
-        template <typename> static std::false_type __test(...);
+        template <typename> static std::false_type test(...);
 
         using type = decltype(test<Alloc>(0));
     };
@@ -179,6 +189,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
         ::new ((void *)p) Tp(std::forward<Args>(args)...);
     }
 
+    // allocator 有 destroy 方法
     template <typename Alloc2, typename Tp>
     static auto S_destroy(Alloc2 &a, Tp *p,
                           int) noexcept(noexcept(a.destroy(p)))
@@ -247,6 +258,7 @@ template <typename Alloc> struct allocator_traits : allocator_traits_base {
     }
 };
 
+// easystl::allocator 偏特化
 template <typename Tp> struct allocator_traits<allocator<Tp>> {
     /// The allocator type
     using allocator_type = allocator<Tp>;
@@ -326,6 +338,7 @@ template <typename Tp> struct allocator_traits<allocator<Tp>> {
     }
 };
 
+// 对 easystl::allocator<void> 偏特化
 template <> struct allocator_traits<allocator<void>> {
     /// The allocator type
     using allocator_type = allocator<void>;
@@ -398,6 +411,7 @@ template <> struct allocator_traits<allocator<void>> {
     }
 };
 
+// TODO: should place in ptr_traits.h
 template <typename T> T *to_address(T *p) noexcept { return p; }
 
 template <typename Ptr>
