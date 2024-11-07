@@ -2,9 +2,11 @@
 #define EASYSTL_ALLOC_TRAITS_H
 
 #ifndef HEADER_STYLE
+#include "ptr_traits.h"
 #include "type_traits.h"
 #include "utility.h"
 #else
+#include "../ptr_traits.h"
 #include "../type_traits.h"
 #include "../utility.h"
 #endif // HEADER_STYLE
@@ -410,14 +412,6 @@ template <> struct allocator_traits<allocator<void>> {
         return *rhs;
     }
 };
-
-// TODO: should place in ptr_traits.h
-template <typename T> T *to_address(T *p) noexcept { return p; }
-
-template <typename Ptr>
-auto to_address(const Ptr &p) noexcept -> decltype(p.operator->()) {
-    return p.operator->();
-}
 
 } // namespace easystl
 
