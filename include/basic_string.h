@@ -3,8 +3,9 @@
 
 #include "algobase.h"
 #include "char_traits.h"
-#include "iterator.h"
-#include "memory"
+#include "iterator/iterator_adapter.h"
+#include "iterator/iterator_funcs.h"
+#include "memory.h"
 #include "utility.h"
 #include <limits>
 

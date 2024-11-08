@@ -2,7 +2,7 @@
 #define EASYSTL_ALGOBASE_H
 
 // 基本算法
-#include "iterator.h"
+#include "iterator/iterator_traits.h"
 #include "utility.h"
 #include <cstddef>
 #include <cstring>
