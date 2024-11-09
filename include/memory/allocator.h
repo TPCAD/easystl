@@ -121,12 +121,19 @@ template <class Tp> class allocator : public allocator_base<Tp> {
 
   public:
     inline allocator() noexcept {}
+
+    // 处理相同类型的分配器
     allocator(const allocator &a) noexcept : allocator_base<Tp>(a) {}
 
-    allocator &operator=(const allocator &) = default;
-
+    // 处理不同类型的分配器，所构造的分配器的元素类型仍然是 Tp
+    // easystl::allocator<int> a1;
+    // easystl::allocator<double> a2(a1);
+    // a2 类型与 a1 无关，仍然是 easystl::allocator<double>
     template <typename Tp1> allocator(const allocator<Tp1> &) noexcept {}
+
     inline ~allocator() noexcept {}
+
+    allocator &operator=(const allocator &) = default;
 
     friend inline bool operator==(const allocator &,
                                   const allocator &) noexcept {
