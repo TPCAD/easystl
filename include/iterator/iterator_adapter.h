@@ -1,10 +1,13 @@
 #ifndef EASYSTL_ITERATOR_ADAPTER_H
 #define EASYSTL_ITERATOR_ADAPTER_H
 
+#include <type_traits>
 #ifndef HEADER_STYLE
 #include "ptr_traits.h"
+#include "utility.h"
 #else
 #include "../ptr_traits.h"
+#include "../utility.h"
 #endif // HEADER_STYLE
 
 #include "iterator_traits.h"
@@ -211,6 +214,187 @@ inline reverse_iterator<Iterator> make_reverse_iterator(Iterator i) {
 }
 
 } // namespace easystl
+
+namespace easystl {
+
+template <typename Iterator> class move_iterator {
+  private:
+    Iterator M_current;
+
+    using traits_type = iterator_traits<Iterator>;
+    using base_ref = typename traits_type::reference;
+
+    template <typename Iter2> friend class move_iterator;
+
+  public:
+    using iterator_type = Iterator;
+    using iterator_category = typename traits_type::iterator_category;
+    using value_type = typename traits_type::value_type;
+    using difference_type = typename traits_type::difference_type;
+    using pointer = Iterator;
+
+    using reference =
+        std::__conditional_t<std::is_reference<base_ref>::value,
+                             typename std::remove_reference<base_ref> &&,
+                             base_ref>;
+
+    move_iterator() : M_current() {}
+
+    explicit move_iterator(iterator_type i) : M_current(easystl::move(i)) {}
+
+    template <typename Iter>
+    move_iterator(const move_iterator<Iter> &i) : M_current(i.M_current) {}
+
+    template <typename Iter>
+    move_iterator &operator=(const move_iterator<Iter> &i) {
+        M_current = i.M_current;
+        return *this;
+    }
+
+    iterator_type base() const { return M_current; }
+
+    reference operator*() const { return static_cast<reference>(*M_current); }
+
+    pointer operator->() const { return M_current; }
+
+    move_iterator &operator++() {
+        ++M_current;
+        return *this;
+    }
+
+    move_iterator operator++(int) {
+        move_iterator tmp = *this;
+        ++M_current;
+        return tmp;
+    }
+
+    move_iterator &operator--() {
+        --M_current;
+        return *this;
+    }
+
+    move_iterator operator--(int) {
+        move_iterator tmp = *this;
+        --M_current;
+        return tmp;
+    }
+
+    move_iterator operator+(difference_type n) const {
+        return move_iterator(M_current + n);
+    }
+
+    move_iterator &operator+=(difference_type n) const {
+        M_current += n;
+        return *this;
+    }
+
+    move_iterator operator-(difference_type n) const {
+        return move_iterator(M_current - n);
+    }
+
+    move_iterator &operator-=(difference_type n) const {
+        M_current -= n;
+        return *this;
+    }
+
+    reference operator[](difference_type n) const {
+        return easystl::move(M_current[n]);
+    }
+};
+
+template <typename IteratorL, typename IteratorR>
+bool operator==(const move_iterator<IteratorL> &x,
+                const move_iterator<IteratorR> &y) {
+    return x.base() == y.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+bool operator!=(const move_iterator<IteratorL> &x,
+                const move_iterator<IteratorR> &y) {
+    return !(x == y);
+}
+
+template <typename IteratorL, typename IteratorR>
+bool operator<(const move_iterator<IteratorL> &x,
+               const move_iterator<IteratorR> &y) {
+    return x.base() < y.base();
+}
+
+template <typename IteratorL, typename IteratorR>
+bool operator<=(const move_iterator<IteratorL> &x,
+                const move_iterator<IteratorR> &y) {
+    return !(x < y);
+}
+
+template <typename IteratorL, typename IteratorR>
+bool operator>(const move_iterator<IteratorL> &x,
+               const move_iterator<IteratorR> &y) {
+    return y < x;
+}
+
+template <typename IteratorL, typename IteratorR>
+bool operator>=(const move_iterator<IteratorL> &x,
+                const move_iterator<IteratorR> &y) {
+    return !(x < y);
+}
+
+template <typename Iterator>
+bool operator==(const move_iterator<Iterator> &x,
+                const move_iterator<Iterator> &y) {
+    return x.base() == y.base();
+}
+
+template <typename Iterator>
+bool operator!=(const move_iterator<Iterator> &x,
+                const move_iterator<Iterator> &y) {
+    return !(x == y);
+}
+
+template <typename Iterator>
+bool operator<(const move_iterator<Iterator> &x,
+               const move_iterator<Iterator> &y) {
+    return x.base() < y.base();
+}
+
+template <typename Iterator>
+bool operator<=(const move_iterator<Iterator> &x,
+                const move_iterator<Iterator> &y) {
+    return !(y < x);
+}
+
+template <typename Iterator>
+bool operator>(const move_iterator<Iterator> &x,
+               const move_iterator<Iterator> &y) {
+    return y < x;
+}
+
+template <typename Iterator>
+bool operator>=(const move_iterator<Iterator> &x,
+                const move_iterator<Iterator> &y) {
+    return !(x < y);
+}
+
+template <typename IteratorL, typename IteratorR>
+auto operator-(const move_iterator<IteratorL> &x,
+               const move_iterator<IteratorR> &y)
+    -> decltype(x.base() - y.base()) {
+    return x.base() - y.base();
+}
+
+template <typename Iterator>
+move_iterator<Iterator>
+operator+(typename move_iterator<Iterator>::difference_type n,
+          const move_iterator<Iterator> &x) {
+    return x + n;
+}
+
+template <typename Iterator>
+move_iterator<Iterator> make_move_iterator(Iterator i) {
+    return move_iterator<Iterator>(easystl::move(i));
+}
+
+} // namespace easystl
+
 namespace easystl_cxx {
 
 template <typename Iterator, typename Container> class normal_iterator {
