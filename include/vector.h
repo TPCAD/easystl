@@ -341,6 +341,7 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     }
     iterator begin() { return iterator(M_data.M_start); }
     iterator end() { return iterator(M_data.M_finish); }
+    bool empty() const noexcept { return begin() == end(); }
 
   protected:
     void M_default_initialize(size_type n) {
