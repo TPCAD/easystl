@@ -325,6 +325,17 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
      */
     vector(vector &&v) noexcept = default;
 
+    /**
+     *  @brief  带分配器的拷贝构造
+     *  @param  v  vector
+     *  @param  a  分配器
+     */
+    vector(const vector &v, const std::__type_identity_t<allocator_type> &a)
+        : M_data(v.size(), a) {
+        this->M_data.M_finish = easystl::__uninitialized_copy_a(
+            v.begin(), v.end(), this->M_data.M_start, M_get_Tp_allocator());
+    }
+
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
     }
