@@ -319,6 +319,12 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
             v.begin(), v.end(), this->M_data.M_start, M_get_Tp_allocator());
     }
 
+    /**
+     *  @brief  移动构造
+     *  @param  v  vector
+     */
+    vector(vector &&v) noexcept = default;
+
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
     }
