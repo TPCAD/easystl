@@ -7,7 +7,6 @@
 #include "memory/uninitialized.h"
 #include "utility.h"
 #include <cstddef>
-#include <iostream>
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
@@ -335,6 +334,33 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
         this->M_data.M_finish = easystl::__uninitialized_copy_a(
             v.begin(), v.end(), this->M_data.M_start, M_get_Tp_allocator());
     }
+
+  private:
+    vector(vector &&rv, const allocator_type &a, std::false_type) : M_data(a) {
+        if (rv.get_allocator() == a) {
+            this->M_data.M_swap_data(rv.M_data);
+        } else if (!rv.empty()) {
+            this->M_data.M_create_storage(rv.size());
+            this->M_data.M_finish = easystl::__uninitialized_move_a(
+                rv.begin(), rv.end(), rv.M_data.M_start, M_get_Tp_allocator());
+            rv.clear();
+        }
+    }
+    vector(vector &&rv, const allocator_type &a, std::true_type)
+        : M_data(a, easystl::move(rv.M_data)) {}
+
+  public:
+    vector(
+        vector &&rv,
+        const std::__type_identity_t<allocator_type>
+            &a) noexcept(noexcept(vector(std::declval<vector &&>(),
+                                         std::declval<const allocator_type &>(),
+                                         std::declval<typename alloc_traits::
+                                                          is_always_equal>())
+
+                                      ))
+        : vector(easystl::move(rv), a,
+                 typename alloc_traits::is_always_equal{}) {}
 
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
