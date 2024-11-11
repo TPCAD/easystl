@@ -343,6 +343,8 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     iterator end() { return iterator(M_data.M_finish); }
     bool empty() const noexcept { return begin() == end(); }
 
+    void clear() noexcept { M_erase_at_end(this->M_data.M_start); }
+
   protected:
     void M_default_initialize(size_type n) {
         this->M_data.M_finish = easystl::uninitialized_default_n_a(
@@ -352,6 +354,17 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     void M_fill_initialize(size_type n, const value_type &value) {
         this->M_data.M_finish = easystl::uninitialized_fill_n_a(
             this->M_data.M_start, n, value, M_get_Tp_allocator());
+    }
+
+    /**
+     *  @brief  删除 [pos, M_data.M_finish) 的元素
+     *  @param  pos  指向新的结束位置的指针
+     */
+    void M_erase_at_end(pointer pos) noexcept {
+        if (this->M_data.M_finish - pos) {
+            std::_Destroy(pos, this->M_data.M_finish, M_get_Tp_allocator());
+            this->M_data.M_finish = pos;
+        }
     }
 
     static size_type S_check_init_len(size_type n, const allocator_type &a) {
