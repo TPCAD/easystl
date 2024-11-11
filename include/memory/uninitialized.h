@@ -4,10 +4,12 @@
 #ifndef HEADER_STYLE
 #include "algobase.h"
 #include "construct.h"
+#include "iterator/iterator_adapter.h"
 #include "iterator/iterator_traits.h"
 #else
 #include "../algobase.h"
 #include "../construct.h"
+#include "../iterator/iterator_adapter.h"
 #include "../iterator/iterator_traits.h"
 
 #endif // HEADER_STYLE
@@ -142,6 +144,24 @@ ForwardIterator __uninitialized_copy_a(InputIterator first, InputIterator last,
                                        ForwardIterator result,
                                        easystl::allocator<Tp> &) {
     return easystl::uninitialized_copy(first, last, result);
+}
+
+/**
+ *  @brief  移动 [first, last) 的元素到 result
+ *  @param  first  输入迭代器
+ *  @param  last  输入迭代器
+ *  @param  result  输出迭代器
+ *  @param  alloc  分配器
+ *  @return  result + (first - last)
+ *
+ *  使用指定分配器进行移动
+ */
+template <typename InputIterator, typename ForwardIterator, typename Allocator>
+ForwardIterator __uninitialized_move_a(InputIterator first, InputIterator last,
+                                       ForwardIterator result,
+                                       Allocator &alloc) {
+    return __uninitialized_copy_a(make_move_iterator(first),
+                                  make_move_iterator(last), result, alloc);
 }
 
 template <typename ForwardIterator, typename Allocator>
