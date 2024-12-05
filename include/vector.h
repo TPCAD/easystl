@@ -3,10 +3,13 @@
 
 #include "algobase.h"
 #include "iterator/iterator_adapter.h"
+#include "iterator/iterator_funcs.h"
+#include "iterator/iterator_traits.h"
 #include "memory/alloc_traits.h"
 #include "memory/uninitialized.h"
 #include "utility.h"
 #include <cstddef>
+#include <initializer_list>
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
@@ -362,6 +365,41 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
         : vector(easystl::move(rv), a,
                  typename alloc_traits::is_always_equal{}) {}
 
+    /**
+     *  @brief  使用初始化队列构造 vector
+     *  @param  l  初始化队列
+     */
+    vector(std::initializer_list<value_type> l,
+           const allocator_type &a = allocator_type())
+        : M_data(a) {
+        M_range_initialize(l.begin(), l.end(),
+                           easystl::random_access_iterator_tag());
+    }
+
+    /**
+     *  @brief  从范围中构造 vector
+     *  @param  first  输入迭代器
+     *  @param  last  输入迭代器
+     *  @param  a  分配器
+     */
+    template <typename InputIterator,
+              typename = easystl::RequireInputIter<InputIterator>>
+    vector(InputIterator first, InputIterator last,
+           const allocator_type &a = allocator_type())
+        : M_data(a) {
+        M_range_initialize(first, last, easystl::iterator_category(first));
+    }
+
+    /**
+     *  @brief  析构函数
+     *
+     *  析构函数只负责删除元素，如果元素是指针，析构函数不会删除其所指向的内存
+     */
+    ~vector() noexcept {
+        std::_Destroy(this->M_data.M_start, this->M_data.M_finish,
+                      this->M_get_Tp_allocator());
+    }
+
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
     }
@@ -375,6 +413,31 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     void M_default_initialize(size_type n) {
         this->M_data.M_finish = easystl::uninitialized_default_n_a(
             this->M_data.M_start, n, M_get_Tp_allocator());
+    }
+
+    template <typename InputIterator>
+    void M_range_initialize(InputIterator first, InputIterator last,
+                            easystl::input_iterator_tag) {
+        try {
+            for (; first != last; ++first) {
+                // BUG: emplace_back is not exist
+                emplace_back(*first);
+            }
+        } catch (...) {
+            clear();
+            throw;
+        }
+    }
+
+    template <typename ForwardIterator>
+    void M_range_initialize(ForwardIterator first, ForwardIterator last,
+                            easystl::forward_iterator_tag) {
+        const size_type n = easystl::distance(first, last);
+        this->M_data.M_start =
+            this->M_data.M_allocate(S_check_init_len(n, M_get_Tp_allocator()));
+        this->M_data.M_end_of_storage = this->M_data.M_start + n;
+        this->M_data.M_finish = easystl::__uninitialized_copy_a(
+            first, last, this->M_data.M_start, M_get_Tp_allocator());
     }
 
     void M_fill_initialize(size_type n, const value_type &value) {
