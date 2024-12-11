@@ -302,8 +302,45 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
     }
-    iterator begin() { return iterator(M_data.M_start); }
-    iterator end() { return iterator(M_data.M_finish); }
+
+    /// normal iterator
+    [[nodiscard]] iterator begin() noexcept { return iterator(M_data.M_start); }
+    [[nodiscard]] const_iterator begin() const noexcept {
+        return const_iterator(M_data.M_start);
+    }
+    [[nodiscard]] iterator end() noexcept { return iterator(M_data.M_finish); }
+    [[nodiscard]] const_iterator end() const noexcept {
+        return const_iterator(M_data.M_finish);
+    }
+
+    /// reverse iterator
+    [[nodiscard]] reverse_iterator rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+    [[nodiscard]] reverse_iterator rbegin() const noexcept {
+        return const_reverse_iterator(end());
+    }
+    [[nodiscard]] reverse_iterator rend() noexcept {
+        return reverse_iterator(begin());
+    }
+    [[nodiscard]] const_reverse_iterator rend() const noexcept {
+        return const_reverse_iterator(begin());
+    }
+
+    /// const iterator
+    [[nodiscard]] const_iterator cbegin() const noexcept {
+        return const_iterator(this->M_data.M_start);
+    }
+    [[nodiscard]] const_iterator cend() const noexcept {
+        return const_iterator(this->M_data.M_finish);
+    }
+    [[nodiscard]] const_reverse_iterator crbegin() const noexcept {
+        return const_reverse_iterator(end());
+    }
+    [[nodiscard]] const_reverse_iterator crend() const noexcept {
+        return const_reverse_iterator(begin());
+    }
+
     bool empty() const noexcept { return begin() == end(); }
 
     void clear() noexcept { M_erase_at_end(this->M_data.M_start); }
