@@ -494,4 +494,16 @@ struct alloc_traits : easystl::allocator_traits<Alloc> {
 
 } // namespace easystl_cxx
 
+namespace easystl {
+
+template <typename Alloc> inline void __alloc_on_move(Alloc &one, Alloc &two) {
+    using traits = easystl::allocator_traits<Alloc>;
+    using pocma = typename traits::propagate_on_container_move_assignment::type;
+    if (pocma::value) {
+        one = easystl::move(two);
+    }
+}
+
+} // namespace easystl
+
 #endif // !EASYSTL_ALLOC_TRAITS_H
