@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include <iostream>
+
 namespace easystl {
 
 template <typename Tp, typename Alloc> struct vector_base {
@@ -400,6 +402,28 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
                       this->M_get_Tp_allocator());
     }
 
+    /**
+     *  @brief  拷贝赋值函数
+     *  @param  x  具有相同元素类型和分配器类型的 vector
+     *
+     *  拷贝所有元素，未使用的容量不会被拷贝
+     */
+    vector &operator=(const vector &x);
+
+    vector &operator=(vector &&x) noexcept(alloc_traits::S_nothrow_move()) {
+        constexpr bool move_storage =
+            alloc_traits::S_propagate_on_move_assign() ||
+            alloc_traits::S_always_equal();
+        M_move_assign(easystl::move(x), std::__bool_constant<move_storage>());
+        return *this;
+    }
+
+    vector &operator=(std::initializer_list<value_type> l) {
+        this->M_assign_aux(l.begin(), l.end(),
+                           easystl::random_access_iterator_tag());
+        return *this;
+    }
+
     size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
     }
@@ -445,6 +469,25 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
             this->M_data.M_start, n, value, M_get_Tp_allocator());
     }
 
+    template <typename InputIterator>
+    void M_assign_aux(InputIterator first, InputIterator last,
+                      easystl::input_iterator_tag) {
+        pointer cur(this->M_data.M_start);
+        for (; first != last && cur != this->M_data.M_finish;
+             ++cur, (void)++first) {
+            *cur = *first;
+        }
+        if (first == last) {
+            M_erase_at_end(cur);
+        } else {
+            M_range_insert();
+        }
+    }
+
+    template <typename InputIterator>
+    void M_range_insert(iterator pos, InputIterator first, InputIterator last,
+                        easystl::input_iterator_tag) {}
+
     /**
      *  @brief  删除 [pos, M_data.M_finish) 的元素
      *  @param  pos  指向新的结束位置的指针
@@ -468,6 +511,13 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
             std::numeric_limits<ptrdiff_t>::max() / sizeof(Tp);
         const auto alloc_max = alloc_traits::max_size(a);
         return easystl::min(diff_max, alloc_max);
+    }
+
+    void M_move_assign(vector &&x, std::true_type) noexcept {
+        vector tmp(get_allocator());
+        this->M_data.M_swap_data(x.M_data);
+        tmp.M_data.M_swap_data(x.M_data);
+        easystl::__alloc_on_move(M_get_Tp_allocator(), x.M_get_Tp_allocator());
     }
 };
 
