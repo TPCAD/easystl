@@ -299,8 +299,11 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
         return *this;
     }
 
-    size_type size() const noexcept {
+    [[nodiscard]] size_type size() const noexcept {
         return size_type(M_data.M_finish - M_data.M_start);
+    }
+    [[nodiscard]] size_type max_size() const noexcept {
+        return S_max_size(M_get_Tp_allocator());
     }
 
     /// normal iterator
