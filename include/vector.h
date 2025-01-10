@@ -344,6 +344,15 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
         return const_reverse_iterator(begin());
     }
 
+    // TODO: M_default_append is not defined
+    void resize(size_type new_size) {
+        if (new_size > size()) {
+            M_default_append(new_size - size());
+        } else {
+            M_erase_at_end(this->M_data.M_start + new_size);
+        }
+    }
+
     bool empty() const noexcept { return begin() == end(); }
 
     void clear() noexcept { M_erase_at_end(this->M_data.M_start); }
@@ -403,6 +412,9 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
     void M_range_insert(iterator pos, InputIterator first, InputIterator last,
                         easystl::input_iterator_tag) {}
 
+    // called by resize(n)
+    void M_default_append(size_type n);
+
     /**
      *  @brief  删除 [pos, M_data.M_finish) 的元素
      *  @param  pos  指向新的结束位置的指针
@@ -412,6 +424,15 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
             std::_Destroy(pos, this->M_data.M_finish, M_get_Tp_allocator());
             this->M_data.M_finish = pos;
         }
+    }
+
+    size_type M_check_len(size_type n, const char *s) const {
+        if (max_size() - size_type() < n) {
+            throw std::length_error(s);
+        }
+
+        const size_type len = size() + easystl::max(size(), n);
+        return (len < size() || len > max_size()) ? max_size() : len;
     }
 
     static size_type S_check_init_len(size_type n, const allocator_type &a) {
@@ -435,6 +456,54 @@ template <typename Tp, typename Alloc = easystl::allocator<Tp>> struct vector {
         easystl::__alloc_on_move(M_get_Tp_allocator(), x.M_get_Tp_allocator());
     }
 };
+
+/**
+ *  @brief  追加容量
+ *  @param  n  需要追加的容量
+ */
+template <typename Tp, typename Alloc>
+void vector<Tp, Alloc>::M_default_append(size_type n) {
+    if (n == 0) {
+        return;
+    }
+
+    const size_type csize = size();
+    size_type avail_storage =
+        size_type(this->M_data.M_end_of_storage - this->M_data.M_finish);
+
+    if (avail_storage >= n) {
+        this->M_data.M_finish = easystl::uninitialized_default_n_a(
+            this->M_data.M_finish, n, M_get_Tp_allocator());
+    } else {
+        pointer old_start = this->M_data.M_start;
+        pointer old_finish = this->M_data.M_finish;
+
+        const size_type len = M_check_len(n, "vector::M_default_append");
+        pointer new_start(this->M_data.M_allocate(len));
+
+        struct Guard {
+            pointer M_storage;
+            size_type M_len;
+            Tp_alloc_type &M_alloc;
+
+            Guard(pointer s, size_type l, Tp_alloc_type &a)
+                : M_storage(s), M_len(l), M_alloc(a) {}
+            ~Guard() {
+                if (M_storage) {
+                    easystl_cxx::alloc_traits<Tp_alloc_type>::deallocate(
+                        M_alloc, M_storage, M_len);
+                }
+            }
+
+          private:
+            Guard(const Guard &);
+        };
+
+        {
+            Guard guard(new_start, len, this->M_data);
+        }
+    }
+}
 
 } // namespace easystl
 
