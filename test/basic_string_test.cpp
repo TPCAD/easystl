@@ -1,9 +1,9 @@
 #include "char_traits.h"
 #include "stringfwd.h"
 #include "utility.h"
-#include "gtest/gtest.h"
 #include <climits>
 #include <cstring>
+#include <gtest/gtest.h>
 #include <initializer_list>
 #include <string>
 
